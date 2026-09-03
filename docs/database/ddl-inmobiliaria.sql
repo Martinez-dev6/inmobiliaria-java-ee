@@ -8,29 +8,29 @@
 
 CREATE TABLE usuario (
     id_usuario      SERIAL PRIMARY KEY,
-    correo          VARCHAR(150) NOT NULL, UNIQUE,
+    correo          VARCHAR(150) NOT NULL UNIQUE,
     contrasena_hash VARCHAR(255) NOT NULL,
     activo          BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_registro  TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE perfil (
-    id_perfil       SERIAL PRIMARY KEY,
-    id_usurio       INTEGER NOT NULL UNIQUE,
-    nombres         VARCHAR(100) NOT NULL,
-    apellidos       VARCHAR(100) NOT NULL,
-    documento       VARCHAR(30) NOT NULL,
-    telefono        VARCHAR(20),
-    direccion       VARCHAR(200),
-    foto_url        VARCHAR(255),
+    id_perfil    SERIAL PRIMARY KEY,
+    id_usuario   INTEGER NOT NULL UNIQUE,
+    nombres      VARCHAR(100) NOT NULL,
+    apellidos    VARCHAR(100) NOT NULL,
+    documento    VARCHAR(30) NOT NULL,
+    telefono     VARCHAR(20),
+    direccion    VARCHAR(200),
+    foto_url     VARCHAR(255),
     CONSTRAINT fk_perfil_usuario
-        FOREIGN KEY (id_usurio) REFERENCES usuario(id_usuario)
+        FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE inmobiliaria (
     id_inmobiliaria     SERIAL PRIMARY KEY,
-    id_usuario          INTEGER NOT NULL,
+    id_usuario          INTEGER NOT NULL UNIQUE,
     nombre_comercial    VARCHAR(150) NOT NULL,
     nit                 VARCHAR(30),
     telefono_contacto   VARCHAR(20),
@@ -40,46 +40,49 @@ CREATE TABLE inmobiliaria (
 );
 
 CREATE TABLE rol (
-    id_rol          INTEGER NOT NULL,
-    nombre_rol      VARCHAR(30) NOT NULL UNIQUE
+    id_rol      SERIAL PRIMARY KEY,
+    nombre_rol  VARCHAR(30) NOT NULL UNIQUE
 );
 
 CREATE TABLE usuario_rol (
-    id_usuario          INTEGER NOT NULL,  
-    id_rol              INTEGER NOT NULL,    
-    fecha_asignacion    TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    id_usuario        INTEGER NOT NULL,
+    id_rol            INTEGER NOT NULL,
+    fecha_asignacion  TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id_usuario, id_rol),
     CONSTRAINT fk_usuario_rol_usuario
         FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_usuario_rol_rol
+        FOREIGN KEY (id_rol) REFERENCES rol (id_rol)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ===== BLOQUE B: Catálogo e inmobiliaria =====
 
-CREATE TABLE ciudad(
-    id_ciudad       SERIAL PRIMARY KEY,
-    nombre_tipo     VARCHAR(100) NOT NULL UNIQUE
+CREATE TABLE ciudad (
+    id_ciudad      SERIAL PRIMARY KEY,
+    nombre_ciudad  VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE tipo_propiedad (
-    id_tipo_propiedad   SERIAL PRIMARY KEY,
-    nombre_tipo         VARCHAR(50) NOT NULL UNIQUE
+    id_tipo_propiedad  SERIAL PRIMARY KEY,
+    nombre_tipo        VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE propiedad (
-    id_propiedad            SERIAL PRIMARY KEY,
-    id_inmobiliaria         INTEGER NOT NULL,
-    id_ciudad               INTEGER NOT NULL,
-    id_tipo_propiedad       INTEGER NOT NULL,
-    matricula_inmobiliaria  VARCHAR (50) NOT NULL UNIQUE,
-    titulo                  VARCHAR (150) NOT NULL,
-    descripcion             TEXT,
-    direccion               VARCHAR(200) NOT NULL,
-    precio                  NUMERIC(14,2) NOT NULL,
-    area_m2                 NUMERIC(8,2),
-    estado                  VARCHAR(20) NOT NULL DEFAULT 'disponible',
-    destacada               BOOLEAN NOT NULL DEFAULT FALSE,
-    fecha_publicacion       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    id_propiedad             SERIAL PRIMARY KEY,
+    id_inmobiliaria          INTEGER NOT NULL,
+    id_ciudad                INTEGER NOT NULL,
+    id_tipo_propiedad        INTEGER NOT NULL,
+    matricula_inmobiliaria   VARCHAR(50) NOT NULL UNIQUE,
+    titulo                   VARCHAR(150) NOT NULL,
+    descripcion              TEXT,
+    direccion                VARCHAR(200) NOT NULL,
+    precio                   NUMERIC(14,2) NOT NULL,
+    area_m2                  NUMERIC(8,2),
+    estado                   VARCHAR(20) NOT NULL DEFAULT 'disponible',
+    destacada                BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_publicacion        TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_propiedad_inmobiliaria
         FOREIGN KEY (id_inmobiliaria) REFERENCES inmobiliaria (id_inmobiliaria)
         ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -87,7 +90,7 @@ CREATE TABLE propiedad (
         FOREIGN KEY (id_ciudad) REFERENCES ciudad (id_ciudad)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_propiedad_tipo
-        FOREIGN (id_tipo_propiedad) REFERENCES tipo_propiedad (id_tipo_propiedad)
+        FOREIGN KEY (id_tipo_propiedad) REFERENCES tipo_propiedad (id_tipo_propiedad)
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
