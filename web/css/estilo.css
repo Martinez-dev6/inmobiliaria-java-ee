@@ -1,0 +1,86 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 7/09/2026, 11:02:41 a. m.
+    Author     : loadl
+*/
+
+:root {
+    --azul: #3E7BFA;
+    --coral: #FF6B5E;
+    --ambar: #FFB648;
+    --oscuro: #1A2332;
+    --claro: #F4F7FE;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #fff;
+    color: var(--oscuro);
+}
+
+h1, h2, h3, h4, .navbar-brand {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.navbar-hogar {
+    background-color: #fff;
+}
+
+.navbar-hogar .nav-link {
+    color: var(--oscuro) !important;
+    position: relative;
+    transition: color 0.2s ease;
+}
+.navbar-hogar .nav-link:hover {
+    font-weight: 600;
+    color: #000000 !important;
+}
+.navbar-hogar .nav-link.active {
+    font-weight: 600;
+    color: #000000 !important;
+}
+.navbar-hogar .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    background-color: #000000;
+    border-radius: 2px;
+}
+
+.btn-coral {
+    background-color: #000000;
+    color: #fff;
+    border: none;
+}
+
+.btn-coral:hover {
+    background-color: #cc0033;
+    color: #fff;
+}
+
+.btn-outline-claro {
+    color: #000000;
+    border: 1px solid #000000;
+}
+
+.btn-outline-claro:hover {
+    background-color: #cc0033;
+    color: #fff;
+}
+
+.btn-outline-secondary{
+    background-color: #fff;
+    color: var(--oscuro);
+}
+
+.btn-outline-secondary:hover{
+    background-color: #cc0033;
+    color: #fff;
+}
