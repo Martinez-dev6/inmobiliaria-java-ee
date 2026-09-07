@@ -4,3 +4,4 @@ nbproject/private/
 nbbuild/
 nbdist/
 *.class
+src/java/db.properties
