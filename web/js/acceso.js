@@ -14,4 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         desactivar();
     });
+
+    if (contenedor.dataset.animarRegreso === 'true') {
+        setTimeout(desactivar, 300);
+    }
 });

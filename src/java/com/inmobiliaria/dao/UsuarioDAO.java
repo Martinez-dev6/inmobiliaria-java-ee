@@ -13,7 +13,7 @@ import java.util.List;
 
 public class UsuarioDAO {
 
-    private static final String ROL_POR_DEFECTO = "cliente";
+    private static final String ROL_POR_DEFECTO = "Cliente";
 
     public void registrarUsuario(Usuario usuario) throws CorreoDuplicadoException, SQLException {
 

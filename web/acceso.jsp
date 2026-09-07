@@ -15,7 +15,9 @@
 </head>
 <body class="fondo-acceso">
 
-    <div class="contenedor-acceso ${panelActivo == 'registro' ? 'derecha-activa' : ''}" id="contenedorAcceso">
+    <div class="contenedor-acceso ${(panelActivo == 'registro' or animarRegreso) ? 'derecha-activa' : ''}"
+     id="contenedorAcceso"
+     data-animar-regreso="${animarRegreso ? 'true' : 'false'}">
 
         <!-- FORMULARIO: INICIAR SESIÓN -->
 <div class="formulario-panel formulario-login">
@@ -24,6 +26,10 @@
 
         <c:if test="${not empty errorLogin}">
             <div class="alerta-error mb-3">${errorLogin}</div>
+        </c:if>
+            
+        <c:if test="${not empty mensajeExito}">
+            <div class="alerta-exito mb-3">${mensajeExito}</div>
         </c:if>
 
         <div class="mb-3">
