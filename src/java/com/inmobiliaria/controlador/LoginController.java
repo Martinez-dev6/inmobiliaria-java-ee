@@ -75,13 +75,13 @@ public class LoginController extends HttpServlet {
         request.getRequestDispatcher("acceso.jsp").forward(request, response);
     }
 
-    private String redirigirSegunRol(java.util.List<String> roles) {
+   private String redirigirSegunRol(java.util.List<String> roles) {
         if (roles.contains("Administrador")) {
-            return "panel-admin.jsp";
+            return "admin/panel.jsp";
         } else if (roles.contains("Inmobiliaria")) {
-            return "panel-agente.jsp";
+            return "agente/panel.jsp";
         } else {
-            return "panel-cliente.jsp";
+            return "cliente/panel.jsp";
         }
     }
 }
