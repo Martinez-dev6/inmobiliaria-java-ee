@@ -1,5 +1,7 @@
 package com.inmobiliaria.dao;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import com.inmobiliaria.excepcion.CorreoDuplicadoException;
 import com.inmobiliaria.modelo.Usuario;
 import com.inmobiliaria.util.ConexionBD;
@@ -109,4 +111,112 @@ public class UsuarioDAO {
         }
         return usuario;
     }
+    
+    public List<Usuario> listarUsuariosConRoles() throws SQLException {
+    String sql =
+        "SELECT u.id_usuario, u.correo, u.activo, r.nombre_rol " +
+        "FROM usuario u " +
+        "LEFT JOIN usuario_rol ur ON ur.id_usuario = u.id_usuario " +
+        "LEFT JOIN rol r ON r.id_rol = ur.id_rol " +
+        "ORDER BY u.correo";
+
+    Map<Integer, Usuario> mapa = new LinkedHashMap<>();
+
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            int id = rs.getInt("id_usuario");
+            Usuario u = mapa.get(id);
+            if (u == null) {
+                u = new Usuario();
+                u.setIdUsuario(id);
+                u.setCorreo(rs.getString("correo"));
+                u.setActivo(rs.getBoolean("activo"));
+                u.setRoles(new ArrayList<>());
+                mapa.put(id, u);
+            }
+            String rol = rs.getString("nombre_rol");
+            if (rol != null) {
+                u.getRoles().add(rol);
+            }
+        }
+    }
+    return new ArrayList<>(mapa.values());
+}
+
+public List<String> listarNombresDeRoles() throws SQLException {
+    String sql = "SELECT nombre_rol FROM rol ORDER BY nombre_rol";
+    List<String> roles = new ArrayList<>();
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            roles.add(rs.getString("nombre_rol"));
+        }
+    }
+    return roles;
+}
+
+public void asignarRol(int idUsuario, String nombreRol) throws SQLException {
+    String sqlBuscarRol = "SELECT id_rol FROM rol WHERE nombre_rol = ?";
+    String sqlInsert = "INSERT INTO usuario_rol (id_usuario, id_rol) VALUES (?, ?)";
+
+    try (Connection con = ConexionBD.obtenerConexion()) {
+        int idRol;
+        try (PreparedStatement ps = con.prepareStatement(sqlBuscarRol)) {
+            ps.setString(1, nombreRol);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("El rol '" + nombreRol + "' no existe.");
+                }
+                idRol = rs.getInt("id_rol");
+            }
+        }
+        try (PreparedStatement ps = con.prepareStatement(sqlInsert)) {
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idRol);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            if (!"23505".equals(e.getSQLState())) {
+                throw e; // 23505 = ya tenía ese rol; lo ignoramos, no es un error real
+            }
+        }
+    }
+}
+
+public int contarRoles(int idUsuario) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM usuario_rol WHERE id_usuario = ?";
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, idUsuario);
+        try (ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        }
+    }
+}
+
+public void revocarRol(int idUsuario, String nombreRol) throws SQLException {
+    String sql = "DELETE FROM usuario_rol WHERE id_usuario = ? " +
+                 "AND id_rol = (SELECT id_rol FROM rol WHERE nombre_rol = ?)";
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, idUsuario);
+        ps.setString(2, nombreRol);
+        ps.executeUpdate();
+    }
+}
+
+public void registrarAuditoria(int idUsuarioActor, String accion, String descripcion) throws SQLException {
+    String sql = "INSERT INTO auditoria (id_usuario, accion, descripcion) VALUES (?, ?, ?)";
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, idUsuarioActor);
+        ps.setString(2, accion);
+        ps.setString(3, descripcion);
+        ps.executeUpdate();
+    }
+}
 }
