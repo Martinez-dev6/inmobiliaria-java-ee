@@ -6,5 +6,6 @@
     <h1>Panel de Cliente (temporal)</h1>
     <p>Sesión activa como: <strong>${sessionScope.correo}</strong></p>
     <p>Roles: <strong>${sessionScope.roles}</strong></p>
+    <p><a href="logout">Cerrar sesión</a></p>
 </body>
 </html>
