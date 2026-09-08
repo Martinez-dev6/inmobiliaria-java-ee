@@ -13,5 +13,6 @@
         <p>No tienes permiso para ver esta página, o tu sesión expiró.</p>
         <a href="acceso.jsp" class="btn btn-coral">Ir a iniciar sesión</a>
     </div>
+        <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
 </body>
 </html>

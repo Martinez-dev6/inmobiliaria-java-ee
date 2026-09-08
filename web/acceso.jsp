@@ -15,7 +15,7 @@
 </head>
 <body class="fondo-acceso">
 
-    <div class="contenedor-acceso ${(panelActivo == 'registro' or animarRegreso) ? 'derecha-activa' : ''}"
+    <div class="contenedor-acceso ${(panelActivo == 'registro' or animarRegreso or param.panelActivo == 'registro') ? 'derecha-activa' : ''}"
      id="contenedorAcceso"
      data-animar-regreso="${animarRegreso ? 'true' : 'false'}">
 
@@ -98,7 +98,8 @@
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/acceso.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
+        <script src="js/acceso.js"></script>
 </body>
 </html>

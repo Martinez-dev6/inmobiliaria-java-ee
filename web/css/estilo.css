@@ -19,6 +19,12 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: #fff;
     color: var(--oscuro);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+body.pagina-visible {
+    opacity: 1;
 }
 
 h1, h2, h3, h4, .navbar-brand {

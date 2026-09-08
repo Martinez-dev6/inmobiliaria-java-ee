@@ -6,6 +6,7 @@
     <h1>Panel de Cliente (temporal)</h1>
     <p>Sesión activa como: <strong>${sessionScope.correo}</strong></p>
     <p>Roles: <strong>${sessionScope.roles}</strong></p>
-   <p><a href="${pageContext.request.contextPath}/logout">Cerrar sesión</a></p>
+    <p><a href="${pageContext.request.contextPath}/cliente/perfil">Mi perfil</a></p>
+    <p><a href="${pageContext.request.contextPath}/logout">Cerrar sesión</a></p>
 </body>
 </html>

@@ -38,8 +38,8 @@
                         </li>
                     </ul>
                     <div class="d-flex gap-2">
-                        <a href="login.jsp" class="btn btn-outline-claro">Iniciar sesión</a>
-                        <a href="registro.jsp" class="btn btn-coral">Registrarse</a>
+                        <a href="acceso.jsp" class="btn btn-outline-claro">Iniciar sesión</a>
+                        <a href="acceso.jsp?panelActivo=registro" class="btn btn-coral">Registrarse</a>
                     </div>
                 </div>
             </div>
@@ -59,7 +59,7 @@
                         </p>
                         <div class="d-flex gap-3 mb-4">
                             <a href="catalogo" class="btn btn-coral btn-lg">Ver catálogo</a>
-                            <a href="registro.jsp" class="btn btn-outline-secondary btn-lg">Crear cuenta</a>
+                            <a href="acceso.jsp?panelActivo=registro" class="btn btn-outline-secondary btn-lg">Crear cuenta</a>
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -178,8 +178,8 @@
                         <ul class="list-unstyled">
                             <li><a href="index.jsp" class="text-white-50 text-decoration-none">Inicio</a></li>
                             <li><a href="catalogo" class="text-white-50 text-decoration-none">Catálogo</a></li>
-                            <li><a href="login.jsp" class="text-white-50 text-decoration-none">Iniciar sesión</a></li>
-                            <li><a href="registro.jsp" class="text-white-50 text-decoration-none">Registrarse</a></li>
+                            <li><a href="acceso.jsp" class="text-white-50 text-decoration-none">Iniciar sesión</a></li>
+                            <li><a  accesskey=""href="acceso.jsp?panelActivo=registro" class="text-white-50 text-decoration-none">Registrarse</a></li>
                         </ul>
                     </div>
                     <div class="col-md-4">
@@ -199,5 +199,6 @@
                         
         <!-- Bootstrap JS (CDN) -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
     </body>
 </html>

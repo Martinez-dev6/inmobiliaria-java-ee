@@ -59,5 +59,5 @@
             </c:forEach>
         </tbody>
     </table>
+    <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
 </body>
-</html>
