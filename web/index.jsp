@@ -1,4 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -75,23 +77,20 @@
                     <form action="catalogo" method="get" class="row g-3 align-items-end">
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Ciudad</label>
-                            <select name="ciudad" class="form-select">
-                                <option selected>Cualquier ciudad</option>
-                                <option>Bogotá</option>
-                                <option>Medellín</option>
-                                <option>Bucaramanga</option>
-                                <option>Cali</option>
+                            <select name="idCiudad" class="form-select">
+                                <option value="">Cualquier ciudad</option>
+                                <c:forEach var="c" items="${ciudades}">
+                                    <option value="${c.idCiudad}">${c.nombreCiudad}</option>
+                                </c:forEach>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Tipo de propiedad</label>
-                            <select name="tipo" class="form-select">
-                                <option selected>Cualquier tipo</option>
-                                <option>Casa</option>
-                                <option>Apartamento</option>
-                                <option>Oficina</option>
-                                <option>Local</option>
-                                <option>Terreno</option>
+                            <select name="idTipoPropiedad" class="form-select">
+                                <option value="">Cualquier tipo</option>
+                                <c:forEach var="t" items="${tipos}">
+                                    <option value="${t.idTipoPropiedad}">${t.nombreTipo}</option>
+                                </c:forEach>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -112,51 +111,38 @@
         <section class="py-5">
             <div class="container">
                 <h2 class="mb-4">Propiedades destacadas</h2>
-                <div class="row g-4">
-
-                    <div class="col-md-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                            <img src="https://images.pexels.com/photos/7587880/pexels-photo-7587880.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                 class="card-img-top" alt="Casa moderna en Bucaramanga" style="height:200px; object-fit:cover;">
-                            <div class="card-body">
-                                <span class="badge mb-2" style="background-color:var(--azul);">Casa</span>
-                                <h5 class="card-title">Casa campestre moderna</h5>
-                                <p class="card-text text-muted mb-1">Bucaramanga, Santander</p>
-                                <p class="card-text fw-bold fs-5">$ 480.000.000</p>
-                                <a href="detalle-propiedad" class="btn btn-outline-claro w-100">Ver detalle</a>
-                            </div>
+                <c:choose>
+                    <c:when test="${empty destacadas}">
+                        <p class="text-muted">Todavía no hay propiedades destacadas — vuelve pronto.</p>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="row g-4">
+                            <c:forEach var="p" items="${destacadas}">
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                        <c:choose>
+                                            <c:when test="${not empty p.urlMiniatura}">
+                                                <img src="${pageContext.request.contextPath}/${p.urlMiniatura}"
+                                                     class="card-img-top" alt="${p.titulo}" style="height:200px; object-fit:cover;"
+                                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27200%27%3E%3Crect width=%27400%27 height=%27200%27 fill=%27%23e0e0e0%27/%3E%3C/svg%3E'">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div style="height:200px;background:#e0e0e0;"></div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <div class="card-body">
+                                            <span class="badge mb-2" style="background-color:var(--azul);">${p.nombreTipo}</span>
+                                            <h5 class="card-title">${p.titulo}</h5>
+                                            <p class="card-text text-muted mb-1">${p.nombreCiudad}</p>
+                                            <p class="card-text fw-bold fs-5">$<fmt:formatNumber value="${p.precio}" pattern="#,##0"/></p>
+                                            <a href="${pageContext.request.contextPath}/propiedad?id=${p.idPropiedad}" class="btn btn-outline-claro w-100">Ver detalle</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
                         </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                            <img src="https://images.pexels.com/photos/6588599/pexels-photo-6588599.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                 class="card-img-top" alt="Apartamento moderno en Medellín" style="height:200px; object-fit:cover;">
-                            <div class="card-body">
-                                <span class="badge mb-2" style="background-color:var(--azul);">Apartamento</span>
-                                <h5 class="card-title">Apartamento vista panorámica</h5>
-                                <p class="card-text text-muted mb-1">Medellín, Antioquia</p>
-                                <p class="card-text fw-bold fs-5">$ 320.000.000</p>
-                                <a href="detalle-propiedad" class="btn btn-outline-claro w-100">Ver detalle</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                            <img src="https://images.pexels.com/photos/37293743/pexels-photo-37293743.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                 class="card-img-top" alt="Oficina moderna en Bogotá" style="height:200px; object-fit:cover;">
-                            <div class="card-body">
-                                <span class="badge mb-2" style="background-color:var(--azul);">Oficina</span>
-                                <h5 class="card-title">Oficina corporativa</h5>
-                                <p class="card-text text-muted mb-1">Bogotá, Cundinamarca</p>
-                                <p class="card-text fw-bold fs-5">$ 210.000.000</p>
-                                <a href="detalle-propiedad" class="btn btn-outline-claro w-100">Ver detalle</a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </section>
         

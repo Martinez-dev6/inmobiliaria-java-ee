@@ -77,11 +77,11 @@ public class LoginController extends HttpServlet {
 
    private String redirigirSegunRol(java.util.List<String> roles) {
         if (roles.contains("Administrador")) {
-            return "admin/panel.jsp";
+            return "admin/panel";
         } else if (roles.contains("Inmobiliaria")) {
-            return "agente/panel.jsp";
+            return "agente/panel";
         } else {
-            return "cliente/panel.jsp";
+            return "cliente/panel";
         }
     }
 }

@@ -18,7 +18,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Mi perfil</h2>
-        <a href="${pageContext.request.contextPath}/cliente/panel.jsp" class="btn btn-outline-claro btn-sm">
+        <a href="${pageContext.request.contextPath}/cliente/panel" class="btn btn-outline-claro btn-sm">
             <i class="bi bi-arrow-left"></i> Volver al panel
         </a>
     </div>

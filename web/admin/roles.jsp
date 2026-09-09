@@ -12,7 +12,7 @@
 <body style="padding: 30px;">
 
     <h1>Gestión de roles de usuario</h1>
-    <p><a href="${pageContext.request.contextPath}/admin/panel.jsp">&larr; Volver al panel</a></p>
+    <p><a href="${pageContext.request.contextPath}/admin/panel">&larr; Volver al panel</a></p>
 
     <c:if test="${not empty mensaje}">
         <div class="alerta-error" style="background:#e3f2ff; color:#0d47a1; max-width:600px;">${mensaje}</div>
