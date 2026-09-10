@@ -74,6 +74,53 @@
                 <c:if test="${not empty propiedad.telefonoInmobiliaria}">
                     <p class="mb-0"><i class="bi bi-telephone"></i> ${propiedad.telefonoInmobiliaria}</p>
                 </c:if>
+
+                <c:if test="${not empty sessionScope.roles and sessionScope.roles.contains('Cliente')}">
+                    <!-- Favorito -->
+                    <form action="${pageContext.request.contextPath}/cliente/favoritos" method="post" class="mt-3">
+                        <input type="hidden" name="idPropiedad" value="${propiedad.idPropiedad}">
+                        <c:choose>
+                            <c:when test="${esFavorita}">
+                                <input type="hidden" name="accion" value="desmarcar">
+                                <button type="submit" class="btn btn-outline-claro w-100">
+                                    <i class="bi bi-heart-fill" style="color:#cc0033;"></i> Quitar de favoritos
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <input type="hidden" name="accion" value="marcar">
+                                <button type="submit" class="btn btn-outline-claro w-100">
+                                    <i class="bi bi-heart"></i> Marcar como favorito
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
+                    </form>
+
+                    <!-- Agendar cita -->
+                    <hr>
+                    <h6>Agendar visita</h6>
+                    <form action="${pageContext.request.contextPath}/cliente/citas" method="post">
+                        <input type="hidden" name="idPropiedad" value="${propiedad.idPropiedad}">
+                        <input type="datetime-local" class="form-control mb-2" name="fechaHora" required>
+                        <button type="submit" class="btn btn-coral w-100 btn-sm">Agendar</button>
+                    </form>
+
+                    <!-- Radicar solicitud -->
+                    <hr>
+                    <h6>Radicar solicitud de compra/arriendo</h6>
+                    <form action="${pageContext.request.contextPath}/cliente/solicitudes" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="idPropiedad" value="${propiedad.idPropiedad}">
+                        <select class="form-select form-select-sm mb-2" name="tipoSolicitud" required>
+                            <option value="">Tipo de solicitud...</option>
+                            <option value="compra">Compra</option>
+                            <option value="arriendo">Arriendo</option>
+                        </select>
+                        <textarea class="form-control form-control-sm mb-2" name="observaciones" rows="2"
+                                  placeholder="Observaciones (opcional)"></textarea>
+                        <label class="form-label small mb-1">Documentos de soporte (opcional)</label>
+                        <input type="file" class="form-control form-control-sm mb-2" name="documentos" multiple>
+                        <button type="submit" class="btn btn-outline-claro w-100 btn-sm">Radicar solicitud</button>
+                    </form>
+                </c:if>
             </div>
         </div>
     </div>

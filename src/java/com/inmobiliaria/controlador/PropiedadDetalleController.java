@@ -1,5 +1,4 @@
-package com.inmobiliaria.controlador;
-
+import com.inmobiliaria.dao.FavoritoDAO;
 import com.inmobiliaria.dao.ImagenPropiedadDAO;
 import com.inmobiliaria.dao.PropiedadCaracteristicaDAO;
 import com.inmobiliaria.dao.PropiedadDAO;
@@ -10,6 +9,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -19,6 +19,7 @@ public class PropiedadDetalleController extends HttpServlet {
     private final PropiedadDAO propiedadDAO = new PropiedadDAO();
     private final ImagenPropiedadDAO imagenPropiedadDAO = new ImagenPropiedadDAO();
     private final PropiedadCaracteristicaDAO propiedadCaracteristicaDAO = new PropiedadCaracteristicaDAO();
+    private final FavoritoDAO favoritoDAO = new FavoritoDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -41,6 +42,12 @@ public class PropiedadDetalleController extends HttpServlet {
             request.setAttribute("propiedad", propiedad);
             request.setAttribute("imagenes", imagenPropiedadDAO.listarPorPropiedad(idPropiedad));
             request.setAttribute("nombresCaracteristicas", propiedadCaracteristicaDAO.listarNombresPorPropiedad(idPropiedad));
+
+            HttpSession sesion = request.getSession(false);
+            if (sesion != null && sesion.getAttribute("idUsuario") != null) {
+                int idUsuario = (int) sesion.getAttribute("idUsuario");
+                request.setAttribute("esFavorita", favoritoDAO.existe(idUsuario, idPropiedad));
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

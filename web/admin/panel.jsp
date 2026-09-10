@@ -51,17 +51,25 @@
     </div>
 
     <div class="row g-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-people"></i> Gestión de roles</h5>
                 <p class="text-muted small">Asigna o revoca roles, activa/inactiva cuentas.</p>
                 <a href="${pageContext.request.contextPath}/admin/roles" class="btn btn-coral btn-sm mt-auto">Ir a gestión de roles</a>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm p-4 h-100 bg-light">
-                <h5><i class="bi bi-clipboard-data"></i> Auditoría y reportes</h5>
-                <p class="text-muted small">Próximamente — Sprint 3.</p>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-bar-chart"></i> Reportes</h5>
+                <p class="text-muted small">Propiedades por ciudad y estado.</p>
+                <a href="${pageContext.request.contextPath}/admin/reportes" class="btn btn-outline-claro btn-sm mt-auto">Ver reportes</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-clipboard-data"></i> Auditoría</h5>
+                <p class="text-muted small">Historial de eventos del sistema.</p>
+                <a href="${pageContext.request.contextPath}/admin/auditoria" class="btn btn-outline-claro btn-sm mt-auto">Ver auditoría</a>
             </div>
         </div>
     </div>

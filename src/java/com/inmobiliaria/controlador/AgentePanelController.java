@@ -1,8 +1,12 @@
 package com.inmobiliaria.controlador;
 
+import com.inmobiliaria.dao.CitaDAO;
 import com.inmobiliaria.dao.InmobiliariaDAO;
 import com.inmobiliaria.dao.PropiedadDAO;
+import com.inmobiliaria.dao.SolicitudDAO;
+import com.inmobiliaria.modelo.Cita;
 import com.inmobiliaria.modelo.Propiedad;
+import com.inmobiliaria.modelo.Solicitud;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,6 +23,8 @@ public class AgentePanelController extends HttpServlet {
 
     private final PropiedadDAO propiedadDAO = new PropiedadDAO();
     private final InmobiliariaDAO inmobiliariaDAO = new InmobiliariaDAO();
+    private final CitaDAO citaDAO = new CitaDAO();
+    private final SolicitudDAO solicitudDAO = new SolicitudDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -41,6 +47,14 @@ public class AgentePanelController extends HttpServlet {
                 request.setAttribute("totalDisponibles", disponibles);
                 request.setAttribute("totalInactivas", inactivas);
                 request.setAttribute("totalDestacadas", destacadas);
+
+                List<Cita> citas = citaDAO.listarPorInmobiliaria(idInmobiliaria);
+                long citasPendientes = citas.stream().filter(c -> "pendiente".equals(c.getEstado())).count();
+                request.setAttribute("citasPendientes", citasPendientes);
+
+                List<Solicitud> solicitudes = solicitudDAO.listarPorInmobiliaria(idInmobiliaria);
+                long solicitudesPendientes = solicitudes.stream().filter(s -> "pendiente".equals(s.getEstado())).count();
+                request.setAttribute("solicitudesPendientes", solicitudesPendientes);
             }
         } catch (SQLException e) {
             e.printStackTrace();

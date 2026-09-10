@@ -37,24 +37,39 @@
     </c:if>
 
     <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-person-circle"></i> Mi perfil</h5>
                 <p class="text-muted small">Actualiza tus datos personales.</p>
                 <a href="${pageContext.request.contextPath}/cliente/perfil" class="btn btn-outline-claro btn-sm mt-auto">Ir a mi perfil</a>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-search"></i> Buscar propiedades</h5>
                 <p class="text-muted small">Explora el catálogo con filtros.</p>
                 <a href="${pageContext.request.contextPath}/catalogo" class="btn btn-outline-claro btn-sm mt-auto">Ver catálogo</a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 h-100 bg-light">
-                <h5><i class="bi bi-calendar-event"></i> Mis citas y solicitudes</h5>
-                <p class="text-muted small">Próximamente — Sprint 3.</p>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-heart"></i> Mis favoritos</h5>
+                <p class="text-muted small">Propiedades que has marcado.</p>
+                <a href="${pageContext.request.contextPath}/cliente/favoritos" class="btn btn-outline-claro btn-sm mt-auto">Ver favoritos</a>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-calendar-event"></i> Mis citas</h5>
+                <p class="text-muted small">${totalCitas} agendada(s).</p>
+                <a href="${pageContext.request.contextPath}/cliente/citas" class="btn btn-outline-claro btn-sm mt-auto">Ver citas</a>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-file-earmark-text"></i> Mis solicitudes</h5>
+                <p class="text-muted small">${totalSolicitudes} radicada(s).</p>
+                <a href="${pageContext.request.contextPath}/cliente/solicitudes" class="btn btn-outline-claro btn-sm mt-auto">Ver solicitudes</a>
             </div>
         </div>
     </div>

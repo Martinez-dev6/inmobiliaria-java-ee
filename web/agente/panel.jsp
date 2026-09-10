@@ -38,30 +38,38 @@
         </div>
         <div class="col-6 col-md-3">
             <div class="card shadow-sm p-3 text-center">
-                <div class="fs-3 fw-bold text-secondary">${totalInactivas}</div>
-                <div class="text-muted small">Inactivas</div>
+                <div class="fs-3 fw-bold text-warning">${citasPendientes}</div>
+                <div class="text-muted small">Citas pendientes</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="card shadow-sm p-3 text-center">
-                <div class="fs-3 fw-bold" style="color:var(--azul);">${totalDestacadas}</div>
-                <div class="text-muted small">Destacadas</div>
+                <div class="fs-3 fw-bold text-warning">${solicitudesPendientes}</div>
+                <div class="text-muted small">Solicitudes pendientes</div>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-houses"></i> Mis propiedades</h5>
                 <p class="text-muted small">Publica, edita y gestiona tu catálogo.</p>
                 <a href="${pageContext.request.contextPath}/agente/propiedades" class="btn btn-coral btn-sm mt-auto">Ver mis propiedades</a>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm p-4 h-100 bg-light">
-                <h5><i class="bi bi-calendar-check"></i> Citas y solicitudes</h5>
-                <p class="text-muted small">Próximamente — Sprint 3.</p>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-calendar-check"></i> Citas</h5>
+                <p class="text-muted small">Confirma o cancela citas agendadas.</p>
+                <a href="${pageContext.request.contextPath}/agente/citas" class="btn btn-outline-claro btn-sm mt-auto">Ver citas</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-file-earmark-text"></i> Solicitudes</h5>
+                <p class="text-muted small">Aprueba o rechaza solicitudes recibidas.</p>
+                <a href="${pageContext.request.contextPath}/agente/solicitudes" class="btn btn-outline-claro btn-sm mt-auto">Ver solicitudes</a>
             </div>
         </div>
     </div>

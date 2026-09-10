@@ -3,12 +3,12 @@ package com.inmobiliaria.dao;
 import com.inmobiliaria.excepcion.MatriculaDuplicadaException;
 import com.inmobiliaria.modelo.Propiedad;
 import com.inmobiliaria.util.ConexionBD;
-import java.math.BigDecimal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,7 +122,7 @@ public class PropiedadDAO {
         }
     }
 
-        public int cambiarEstado(int idPropiedad, int idInmobiliaria, String nuevoEstado) throws SQLException {
+    public int cambiarEstado(int idPropiedad, int idInmobiliaria, String nuevoEstado) throws SQLException {
 
         String sql = "UPDATE propiedad SET estado = ? WHERE id_propiedad = ? AND id_inmobiliaria = ?";
 
@@ -134,6 +134,19 @@ public class PropiedadDAO {
             ps.setInt(3, idInmobiliaria);
 
             return ps.executeUpdate();
+        }
+    }
+
+    public int contarTodas() throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM propiedad";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            rs.next();
+            return rs.getInt(1);
         }
     }
 
@@ -205,17 +218,65 @@ public class PropiedadDAO {
         return propiedades;
     }
 
-    public int contarTodas() throws SQLException {
+    public List<Propiedad> listarFavoritasDeUsuario(int idUsuario) throws SQLException {
 
-        String sql = "SELECT COUNT(*) FROM propiedad";
+        String sql = SELECT_BASE + "JOIN favorito f ON f.id_propiedad = p.id_propiedad " +
+                     "WHERE f.id_usuario = ? ORDER BY f.fecha_marcado DESC";
+
+        List<Propiedad> propiedades = new ArrayList<>();
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            rs.next();
-            return rs.getInt(1);
+            ps.setInt(1, idUsuario);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    propiedades.add(mapearFila(rs));
+                }
+            }
         }
+
+        return propiedades;
+    }
+
+    /**
+     * Historia/consulta obligatoria del PDF: LEFT JOIN — propiedades disponibles
+     * de una inmobiliaria que todavia NO tienen ninguna cita agendada.
+     * El LEFT JOIN es necesario (no un INNER JOIN): sin el, una propiedad sin
+     * ninguna fila en 'cita' desaparecería del resultado en vez de aparecer con
+     * id_cita = NULL, que es justo la condicion que se filtra despues en el WHERE.
+     */
+    public List<Propiedad> listarSinCitas(int idInmobiliaria) throws SQLException {
+
+        String sql = "SELECT p.id_propiedad, p.id_inmobiliaria, p.id_ciudad, p.id_tipo_propiedad, " +
+                     "       p.matricula_inmobiliaria, p.titulo, p.descripcion, p.direccion, " +
+                     "       p.precio, p.area_m2, p.estado, p.destacada, p.fecha_publicacion, " +
+                     "       c.nombre_ciudad, t.nombre_tipo, i.nombre_comercial, i.telefono_contacto, " +
+                     "       NULL AS url_miniatura " +
+                     "FROM propiedad p " +
+                     "JOIN ciudad c ON c.id_ciudad = p.id_ciudad " +
+                     "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad " +
+                     "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria " +
+                     "LEFT JOIN cita ci ON ci.id_propiedad = p.id_propiedad " +
+                     "WHERE p.id_inmobiliaria = ? AND ci.id_cita IS NULL " +
+                     "ORDER BY p.fecha_publicacion DESC";
+
+        List<Propiedad> propiedades = new ArrayList<>();
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idInmobiliaria);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    propiedades.add(mapearFila(rs));
+                }
+            }
+        }
+
+        return propiedades;
     }
 
     private Propiedad mapearFila(ResultSet rs) throws SQLException {

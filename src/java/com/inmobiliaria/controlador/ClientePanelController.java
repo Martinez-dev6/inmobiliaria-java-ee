@@ -1,6 +1,8 @@
 package com.inmobiliaria.controlador;
 
+import com.inmobiliaria.dao.CitaDAO;
 import com.inmobiliaria.dao.PerfilDAO;
+import com.inmobiliaria.dao.SolicitudDAO;
 import com.inmobiliaria.modelo.Perfil;
 
 import javax.servlet.ServletException;
@@ -16,6 +18,8 @@ import java.sql.SQLException;
 public class ClientePanelController extends HttpServlet {
 
     private final PerfilDAO perfilDAO = new PerfilDAO();
+    private final CitaDAO citaDAO = new CitaDAO();
+    private final SolicitudDAO solicitudDAO = new SolicitudDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -27,6 +31,8 @@ public class ClientePanelController extends HttpServlet {
         try {
             Perfil perfil = perfilDAO.buscarPorIdUsuario(idUsuario);
             request.setAttribute("perfil", perfil);
+            request.setAttribute("totalCitas", citaDAO.listarPorCliente(idUsuario).size());
+            request.setAttribute("totalSolicitudes", solicitudDAO.listarPorCliente(idUsuario).size());
         } catch (SQLException e) {
             e.printStackTrace();
         }
