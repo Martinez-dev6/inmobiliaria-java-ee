@@ -3,6 +3,7 @@ package com.inmobiliaria.controlador;
 import com.inmobiliaria.dao.DocumentoSolicitudDAO;
 import com.inmobiliaria.dao.InmobiliariaDAO;
 import com.inmobiliaria.dao.SolicitudDAO;
+import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.modelo.DocumentoSolicitud;
 import com.inmobiliaria.modelo.Solicitud;
 
@@ -24,6 +25,7 @@ public class SolicitudAgenteController extends HttpServlet {
     private final SolicitudDAO solicitudDAO = new SolicitudDAO();
     private final DocumentoSolicitudDAO documentoDAO = new DocumentoSolicitudDAO();
     private final InmobiliariaDAO inmobiliariaDAO = new InmobiliariaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,11 +40,18 @@ public class SolicitudAgenteController extends HttpServlet {
         Integer idInmobiliaria = resolverIdInmobiliaria(request);
         int idSolicitud = Integer.parseInt(request.getParameter("idSolicitud"));
         String accion = request.getParameter("accion");
+        String respuesta = request.getParameter("respuesta");
         String nuevoEstado = "aprobar".equals(accion) ? "aprobada" : "rechazada";
 
         try {
             if (idInmobiliaria != null) {
-                solicitudDAO.cambiarEstado(idSolicitud, idInmobiliaria, nuevoEstado);
+                solicitudDAO.cambiarEstado(idSolicitud, idInmobiliaria, nuevoEstado, respuesta);
+
+                HttpSession sesion = request.getSession(false);
+                int idUsuario = (int) sesion.getAttribute("idUsuario");
+                usuarioDAO.registrarAuditoria(idUsuario,
+                        "aprobar".equals(accion) ? "aprobar_solicitud" : "rechazar_solicitud",
+                        "Solicitud id " + idSolicitud + " → " + nuevoEstado);
             }
         } catch (SQLException e) {
             e.printStackTrace();

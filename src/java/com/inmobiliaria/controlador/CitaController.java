@@ -1,6 +1,7 @@
 package com.inmobiliaria.controlador;
 
 import com.inmobiliaria.dao.CitaDAO;
+import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.excepcion.HorarioOcupadoException;
 import com.inmobiliaria.modelo.Cita;
 
@@ -18,6 +19,7 @@ import java.sql.Timestamp;
 public class CitaController extends HttpServlet {
 
     private final CitaDAO citaDAO = new CitaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -28,6 +30,11 @@ public class CitaController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if ("cancelar".equals(request.getParameter("accion"))) {
+            procesarCancelar(request, response);
+            return;
+        }
 
         HttpSession sesion = request.getSession(false);
         int idCliente = (int) sesion.getAttribute("idUsuario");
@@ -44,7 +51,9 @@ public class CitaController extends HttpServlet {
         Cita cita = new Cita(idPropiedad, idCliente, fechaHora);
 
         try {
-            citaDAO.crear(cita);
+            int idGenerado = citaDAO.crear(cita);
+            usuarioDAO.registrarAuditoria(idCliente, "agendar_cita",
+                    "Agendó la cita id " + idGenerado + " para la propiedad id " + idPropiedad);
             mostrar(request, response, null, "Cita agendada correctamente.");
         } catch (HorarioOcupadoException e) {
             mostrar(request, response, e.getMessage(), null);
@@ -52,6 +61,29 @@ public class CitaController extends HttpServlet {
             e.printStackTrace();
             mostrar(request, response, "No se pudo agendar la cita. Intenta más tarde.", null);
         }
+    }
+
+    private void procesarCancelar(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession sesion = request.getSession(false);
+        int idCliente = (int) sesion.getAttribute("idUsuario");
+        int idCita = Integer.parseInt(request.getParameter("idCita"));
+
+        try {
+            int filas = citaDAO.cancelarPorCliente(idCita, idCliente);
+            if (filas == 0) {
+                mostrar(request, response, "Esa cita no se puede cancelar (ya pasó o no es tuya).", null);
+                return;
+            }
+            usuarioDAO.registrarAuditoria(idCliente, "cancelar_cita_cliente", "Canceló su cita id " + idCita);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrar(request, response, "No se pudo cancelar la cita. Intenta más tarde.", null);
+            return;
+        }
+
+        mostrar(request, response, null, "Cita cancelada.");
     }
 
     private Timestamp parsearFechaHora(String texto) {

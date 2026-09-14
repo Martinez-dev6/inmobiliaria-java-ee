@@ -124,11 +124,13 @@ CREATE TABLE propiedad_caracteristica (
 -- ===== BLOQUE C: Operación =====
 
 CREATE TABLE cita (
-    id_cita       SERIAL PRIMARY KEY,
-    id_propiedad  INTEGER NOT NULL,
-    id_cliente    INTEGER NOT NULL,
-    fecha_hora    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    estado        VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    id_cita           SERIAL PRIMARY KEY,
+    id_propiedad      INTEGER NOT NULL,
+    id_cliente        INTEGER NOT NULL,
+    fecha_hora        TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    estado            VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    respuesta_agente  TEXT,
+    fecha_respuesta   TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT uq_cita_propiedad_fecha UNIQUE (id_propiedad, fecha_hora),
     CONSTRAINT fk_cita_propiedad
         FOREIGN KEY (id_propiedad) REFERENCES propiedad (id_propiedad)
@@ -146,6 +148,8 @@ CREATE TABLE solicitud (
     estado            VARCHAR(20) NOT NULL DEFAULT 'pendiente',
     fecha_solicitud   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
     observaciones     TEXT,
+    respuesta_agente  TEXT,
+    fecha_respuesta   TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT fk_solicitud_propiedad
         FOREIGN KEY (id_propiedad) REFERENCES propiedad (id_propiedad)
         ON DELETE CASCADE ON UPDATE CASCADE,

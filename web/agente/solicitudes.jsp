@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitudes recibidas — Hogar 360</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,14 +16,11 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/">Hogar 360</a>
-        <a href="${pageContext.request.contextPath}/agente/panel" class="btn btn-outline-claro btn-sm">
-            <i class="bi bi-arrow-left"></i> Volver al panel
-        </a>
-    </div>
-</nav>
+<jsp:include page="/WEB-INF/jspf/navbar.jsp">
+    <jsp:param name="navTipo" value="volver" />
+    <jsp:param name="navDestino" value="agente/panel" />
+    <jsp:param name="navTexto" value="Volver al panel" />
+</jsp:include>
 
 <div class="container py-5">
     <h2 class="mb-4">Solicitudes recibidas</h2>
@@ -42,10 +40,20 @@
                         <div>
                             <h6 class="mb-1">${s.tituloPropiedad} — <span class="text-capitalize">${s.tipoSolicitud}</span></h6>
                             <p class="text-muted small mb-1">
-                                Cliente: ${s.correoCliente} · <fmt:formatDate value="${s.fechaSolicitud}" pattern="dd/MM/yyyy"/>
+                                Cliente:
+                                <c:choose>
+                                    <c:when test="${not empty s.nombresCliente}">${s.nombresCliente} ${s.apellidosCliente}</c:when>
+                                    <c:otherwise>${s.correoCliente}</c:otherwise>
+                                </c:choose>
+                                · <i class="bi bi-envelope"></i> ${s.correoCliente}
+                                <c:if test="${not empty s.telefonoCliente}"> · <i class="bi bi-telephone"></i> ${s.telefonoCliente}</c:if>
+                                · <fmt:formatDate value="${s.fechaSolicitud}" pattern="dd/MM/yyyy"/>
                             </p>
                             <c:if test="${not empty s.observaciones}">
                                 <p class="small mb-1">"${s.observaciones}"</p>
+                            </c:if>
+                            <c:if test="${not empty s.respuestaAgente}">
+                                <p class="small mb-1"><strong>Tu respuesta:</strong> "${s.respuestaAgente}"</p>
                             </c:if>
 
                             <c:set var="documentos" value="${documentosPorSolicitud[s.idSolicitud]}"/>
@@ -68,16 +76,16 @@
                                     <span class="badge bg-secondary mb-2">Rechazada</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge bg-warning text-dark mb-2">Pendiente</span><br>
-                                    <form action="${pageContext.request.contextPath}/agente/solicitudes" method="post" class="d-inline">
+                                    <span class="badge bg-warning text-dark mb-2">Pendiente</span>
+                                    <form action="${pageContext.request.contextPath}/agente/solicitudes" method="post" style="min-width:220px;">
                                         <input type="hidden" name="idSolicitud" value="${s.idSolicitud}">
-                                        <input type="hidden" name="accion" value="aprobar">
-                                        <button type="submit" class="btn btn-coral btn-sm">Aprobar</button>
-                                    </form>
-                                    <form action="${pageContext.request.contextPath}/agente/solicitudes" method="post" class="d-inline">
-                                        <input type="hidden" name="idSolicitud" value="${s.idSolicitud}">
-                                        <input type="hidden" name="accion" value="rechazar">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">Rechazar</button>
+                                        <textarea name="respuesta" class="form-control form-control-sm mb-2" rows="2"
+                                                  style="resize:none;"
+                                                  placeholder="Mensaje para el cliente (opcional)"></textarea>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="submit" name="accion" value="aprobar" class="btn btn-coral btn-sm">Aprobar</button>
+                                            <button type="submit" name="accion" value="rechazar" class="btn btn-outline-secondary btn-sm">Rechazar</button>
+                                        </div>
                                     </form>
                                 </c:otherwise>
                             </c:choose>

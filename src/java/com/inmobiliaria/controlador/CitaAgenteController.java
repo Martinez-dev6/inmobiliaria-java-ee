@@ -2,6 +2,7 @@ package com.inmobiliaria.controlador;
 
 import com.inmobiliaria.dao.CitaDAO;
 import com.inmobiliaria.dao.InmobiliariaDAO;
+import com.inmobiliaria.dao.UsuarioDAO;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,6 +18,7 @@ public class CitaAgenteController extends HttpServlet {
 
     private final CitaDAO citaDAO = new CitaDAO();
     private final InmobiliariaDAO inmobiliariaDAO = new InmobiliariaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -31,6 +33,7 @@ public class CitaAgenteController extends HttpServlet {
         Integer idInmobiliaria = resolverIdInmobiliaria(request);
         int idCita = Integer.parseInt(request.getParameter("idCita"));
         String accion = request.getParameter("accion");
+        String respuesta = request.getParameter("respuesta");
 
         String nuevoEstado;
         switch (accion) {
@@ -49,7 +52,12 @@ public class CitaAgenteController extends HttpServlet {
 
         try {
             if (idInmobiliaria != null && nuevoEstado != null) {
-                citaDAO.cambiarEstado(idCita, idInmobiliaria, nuevoEstado);
+                citaDAO.cambiarEstado(idCita, idInmobiliaria, nuevoEstado, respuesta);
+
+                HttpSession sesion = request.getSession(false);
+                int idUsuario = (int) sesion.getAttribute("idUsuario");
+                usuarioDAO.registrarAuditoria(idUsuario, "cambio_estado_cita",
+                        "Cita id " + idCita + " → " + nuevoEstado);
             }
         } catch (SQLException e) {
             e.printStackTrace();

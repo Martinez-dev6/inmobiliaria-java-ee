@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Citas de mis propiedades — Hogar 360</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,14 +16,11 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/">Hogar 360</a>
-        <a href="${pageContext.request.contextPath}/agente/panel" class="btn btn-outline-claro btn-sm">
-            <i class="bi bi-arrow-left"></i> Volver al panel
-        </a>
-    </div>
-</nav>
+<jsp:include page="/WEB-INF/jspf/navbar.jsp">
+    <jsp:param name="navTipo" value="volver" />
+    <jsp:param name="navDestino" value="agente/panel" />
+    <jsp:param name="navTexto" value="Volver al panel" />
+</jsp:include>
 
 <div class="container py-5">
     <h2 class="mb-4">Citas de mis propiedades</h2>
@@ -51,7 +49,16 @@
                         <c:forEach var="c" items="${citas}">
                             <tr>
                                 <td>${c.tituloPropiedad}</td>
-                                <td>${c.correoCliente}</td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${not empty c.nombresCliente}">${c.nombresCliente} ${c.apellidosCliente}</c:when>
+                                        <c:otherwise>${c.correoCliente}</c:otherwise>
+                                    </c:choose>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-envelope"></i> ${c.correoCliente}
+                                        <c:if test="${not empty c.telefonoCliente}"> · <i class="bi bi-telephone"></i> ${c.telefonoCliente}</c:if>
+                                    </div>
+                                </td>
                                 <td><fmt:formatDate value="${c.fechaHora}" pattern="dd/MM/yyyy HH:mm"/></td>
                                 <td>
                                     <c:choose>
@@ -68,30 +75,33 @@
                                             <span class="badge bg-warning text-dark">Pendiente</span>
                                         </c:otherwise>
                                     </c:choose>
+                                    <c:if test="${not empty c.respuestaAgente}">
+                                        <div class="text-muted small mt-1">"${c.respuestaAgente}"</div>
+                                    </c:if>
                                 </td>
                                 <td>
                                     <c:if test="${c.estado == 'pendiente'}">
-                                        <form action="${pageContext.request.contextPath}/agente/citas" method="post" class="d-inline">
+                                        <form action="${pageContext.request.contextPath}/agente/citas" method="post" style="min-width:200px;">
                                             <input type="hidden" name="idCita" value="${c.idCita}">
-                                            <input type="hidden" name="accion" value="confirmar">
-                                            <button type="submit" class="btn btn-outline-claro btn-sm">Confirmar</button>
-                                        </form>
-                                        <form action="${pageContext.request.contextPath}/agente/citas" method="post" class="d-inline">
-                                            <input type="hidden" name="idCita" value="${c.idCita}">
-                                            <input type="hidden" name="accion" value="cancelar">
-                                            <button type="submit" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+                                            <textarea name="respuesta" class="form-control form-control-sm mb-1" rows="1"
+                                                      style="resize:none;"
+                                                      placeholder="Mensaje (opcional)"></textarea>
+                                            <div class="d-flex gap-1">
+                                                <button type="submit" name="accion" value="confirmar" class="btn btn-outline-claro btn-sm">Confirmar</button>
+                                                <button type="submit" name="accion" value="cancelar" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+                                            </div>
                                         </form>
                                     </c:if>
                                     <c:if test="${c.estado == 'confirmada'}">
-                                        <form action="${pageContext.request.contextPath}/agente/citas" method="post" class="d-inline">
+                                        <form action="${pageContext.request.contextPath}/agente/citas" method="post" style="min-width:200px;">
                                             <input type="hidden" name="idCita" value="${c.idCita}">
-                                            <input type="hidden" name="accion" value="realizada">
-                                            <button type="submit" class="btn btn-outline-claro btn-sm">Marcar realizada</button>
-                                        </form>
-                                        <form action="${pageContext.request.contextPath}/agente/citas" method="post" class="d-inline">
-                                            <input type="hidden" name="idCita" value="${c.idCita}">
-                                            <input type="hidden" name="accion" value="cancelar">
-                                            <button type="submit" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+                                            <textarea name="respuesta" class="form-control form-control-sm mb-1" rows="1"
+                                                      style="resize:none;"
+                                                      placeholder="Mensaje (opcional)"></textarea>
+                                            <div class="d-flex gap-1">
+                                                <button type="submit" name="accion" value="realizada" class="btn btn-outline-claro btn-sm">Marcar realizada</button>
+                                                <button type="submit" name="accion" value="cancelar" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+                                            </div>
                                         </form>
                                     </c:if>
                                 </td>

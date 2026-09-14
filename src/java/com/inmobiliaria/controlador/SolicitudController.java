@@ -2,6 +2,7 @@ package com.inmobiliaria.controlador;
 
 import com.inmobiliaria.dao.DocumentoSolicitudDAO;
 import com.inmobiliaria.dao.SolicitudDAO;
+import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.modelo.Solicitud;
 
 import javax.servlet.ServletException;
@@ -27,6 +28,7 @@ public class SolicitudController extends HttpServlet {
 
     private final SolicitudDAO solicitudDAO = new SolicitudDAO();
     private final DocumentoSolicitudDAO documentoDAO = new DocumentoSolicitudDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -55,6 +57,9 @@ public class SolicitudController extends HttpServlet {
         try {
             int idGenerado = solicitudDAO.crear(solicitud);
             guardarDocumentos(request, idGenerado);
+            usuarioDAO.registrarAuditoria(idCliente, "radicar_solicitud",
+                    "Radicó una solicitud de " + tipoSolicitud + " (id " + idGenerado
+                            + ") para la propiedad id " + idPropiedad);
             mostrar(request, response, null, "Solicitud radicada correctamente.");
         } catch (SQLException e) {
             e.printStackTrace();

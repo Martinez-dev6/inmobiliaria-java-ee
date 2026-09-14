@@ -11,10 +11,15 @@ public class Solicitud {
     private String estado;
     private Timestamp fechaSolicitud;
     private String observaciones;
+    private String respuestaAgente;
+    private Timestamp fechaRespuesta;
 
     // Derivados de JOIN (no son columnas de 'solicitud'); se llenan solo en consultas de listado.
     private String tituloPropiedad;
     private String correoCliente;
+    private String nombresCliente;
+    private String apellidosCliente;
+    private String telefonoCliente;
 
     public Solicitud() {
     }
@@ -82,6 +87,22 @@ public class Solicitud {
         this.observaciones = observaciones;
     }
 
+    public String getRespuestaAgente() {
+        return respuestaAgente;
+    }
+
+    public void setRespuestaAgente(String respuestaAgente) {
+        this.respuestaAgente = respuestaAgente;
+    }
+
+    public Timestamp getFechaRespuesta() {
+        return fechaRespuesta;
+    }
+
+    public void setFechaRespuesta(Timestamp fechaRespuesta) {
+        this.fechaRespuesta = fechaRespuesta;
+    }
+
     public String getTituloPropiedad() {
         return tituloPropiedad;
     }
@@ -96,5 +117,29 @@ public class Solicitud {
 
     public void setCorreoCliente(String correoCliente) {
         this.correoCliente = correoCliente;
+    }
+
+    public String getNombresCliente() {
+        return nombresCliente;
+    }
+
+    public void setNombresCliente(String nombresCliente) {
+        this.nombresCliente = nombresCliente;
+    }
+
+    public String getApellidosCliente() {
+        return apellidosCliente;
+    }
+
+    public void setApellidosCliente(String apellidosCliente) {
+        this.apellidosCliente = apellidosCliente;
+    }
+
+    public String getTelefonoCliente() {
+        return telefonoCliente;
+    }
+
+    public void setTelefonoCliente(String telefonoCliente) {
+        this.telefonoCliente = telefonoCliente;
     }
 }

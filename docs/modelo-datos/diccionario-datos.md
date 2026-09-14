@@ -145,6 +145,8 @@ Agendamiento de visitas a una propiedad.
 | id_cliente | integer | FK → usuario | ✔ | | Cliente que agenda la visita |
 | fecha_hora | timestamp | | ✔ | | Fecha y hora de la visita |
 | estado | varchar(20) | | ✔ | | pendiente / confirmada / cancelada / realizada |
+| respuesta_agente | text | | | | Mensaje de la inmobiliaria al confirmar/cancelar (agregada 2026-09-11) |
+| fecha_respuesta | timestamp | | | | Momento en que la inmobiliaria respondió (agregada 2026-09-11) |
 | *(id_propiedad, fecha_hora)* | — | | | ✔ | UNIQUE compuesta: evita cruces de agenda en la misma propiedad |
 
 ### Tabla `solicitud`
@@ -158,7 +160,9 @@ Trámite de compra o arriendo de una propiedad.
 | tipo_solicitud | varchar(20) | | ✔ | | compra / arriendo |
 | estado | varchar(20) | | ✔ | | pendiente / aprobada / rechazada |
 | fecha_solicitud | timestamp | | ✔ | | Fecha de radicación |
-| observaciones | text | | | | Comentario de la inmobiliaria al aprobar/rechazar |
+| observaciones | text | | | | Comentario del CLIENTE al radicar la solicitud (no de la inmobiliaria — corregido 2026-09-11) |
+| respuesta_agente | text | | | | Mensaje de la inmobiliaria al aprobar/rechazar (agregada 2026-09-11) |
+| fecha_respuesta | timestamp | | | | Momento en que la inmobiliaria respondió (agregada 2026-09-11) |
 
 ### Tabla `documento_solicitud`
 Documentos adjuntos a una solicitud (relación 1:N).

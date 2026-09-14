@@ -41,7 +41,7 @@ public class CitaDAO {
     public List<Cita> listarPorCliente(int idCliente) throws SQLException {
 
         String sql = "SELECT c.id_cita, c.id_propiedad, c.id_cliente, c.fecha_hora, c.estado, " +
-                     "       p.titulo AS titulo_propiedad " +
+                     "       c.respuesta_agente, c.fecha_respuesta, p.titulo AS titulo_propiedad " +
                      "FROM cita c " +
                      "JOIN propiedad p ON p.id_propiedad = c.id_propiedad " +
                      "WHERE c.id_cliente = ? " +
@@ -67,10 +67,14 @@ public class CitaDAO {
     public List<Cita> listarPorInmobiliaria(int idInmobiliaria) throws SQLException {
 
         String sql = "SELECT c.id_cita, c.id_propiedad, c.id_cliente, c.fecha_hora, c.estado, " +
-                     "       p.titulo AS titulo_propiedad, u.correo AS correo_cliente " +
+                     "       c.respuesta_agente, c.fecha_respuesta, " +
+                     "       p.titulo AS titulo_propiedad, u.correo AS correo_cliente, " +
+                     "       pf.nombres AS nombres_cliente, pf.apellidos AS apellidos_cliente, " +
+                     "       pf.telefono AS telefono_cliente " +
                      "FROM cita c " +
                      "JOIN propiedad p ON p.id_propiedad = c.id_propiedad " +
                      "JOIN usuario u ON u.id_usuario = c.id_cliente " +
+                     "LEFT JOIN perfil pf ON pf.id_usuario = c.id_cliente " +
                      "WHERE p.id_inmobiliaria = ? " +
                      "ORDER BY c.fecha_hora ASC";
 
@@ -92,20 +96,44 @@ public class CitaDAO {
     }
 
     /**
-     * Cambia el estado de una cita, verificando que la propiedad de esa cita
-     * pertenezca a la inmobiliaria que hace la peticion (proteccion IDOR).
+     * Cambia el estado de una cita (y registra el mensaje del agente para el
+     * cliente), verificando que la propiedad de esa cita pertenezca a la
+     * inmobiliaria que hace la peticion (proteccion IDOR).
      */
-    public int cambiarEstado(int idCita, int idInmobiliaria, String nuevoEstado) throws SQLException {
+    public int cambiarEstado(int idCita, int idInmobiliaria, String nuevoEstado, String respuesta)
+            throws SQLException {
 
-        String sql = "UPDATE cita SET estado = ? WHERE id_cita = ? " +
+        String sql = "UPDATE cita SET estado = ?, respuesta_agente = ?, fecha_respuesta = NOW() " +
+                     "WHERE id_cita = ? " +
                      "AND id_propiedad IN (SELECT id_propiedad FROM propiedad WHERE id_inmobiliaria = ?)";
 
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, nuevoEstado);
-            ps.setInt(2, idCita);
-            ps.setInt(3, idInmobiliaria);
+            ps.setString(2, respuesta);
+            ps.setInt(3, idCita);
+            ps.setInt(4, idInmobiliaria);
+
+            return ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Cancela una cita a pedido del propio cliente (no del agente): verifica
+     * que la cita sea de ese cliente (proteccion IDOR) y que todavia no haya
+     * pasado (no se puede "cancelar" una cita ya realizada o ya cancelada).
+     */
+    public int cancelarPorCliente(int idCita, int idCliente) throws SQLException {
+
+        String sql = "UPDATE cita SET estado = 'cancelada' WHERE id_cita = ? AND id_cliente = ? " +
+                     "AND estado IN ('pendiente', 'confirmada')";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idCita);
+            ps.setInt(2, idCliente);
 
             return ps.executeUpdate();
         }
@@ -118,9 +146,14 @@ public class CitaDAO {
         c.setIdCliente(rs.getInt("id_cliente"));
         c.setFechaHora(rs.getTimestamp("fecha_hora"));
         c.setEstado(rs.getString("estado"));
+        c.setRespuestaAgente(rs.getString("respuesta_agente"));
+        c.setFechaRespuesta(rs.getTimestamp("fecha_respuesta"));
         c.setTituloPropiedad(rs.getString("titulo_propiedad"));
         if (conCliente) {
             c.setCorreoCliente(rs.getString("correo_cliente"));
+            c.setNombresCliente(rs.getString("nombres_cliente"));
+            c.setApellidosCliente(rs.getString("apellidos_cliente"));
+            c.setTelefonoCliente(rs.getString("telefono_cliente"));
         }
         return c;
     }
