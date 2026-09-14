@@ -7,6 +7,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Hogar 360</title>
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,30 +23,24 @@
     <body>
 
           <!-- Barra de navegación -->
-        <nav class="navbar navbar-expand-lg navbar-hogar">
-            <div class="container">
-                <a class="navbar-brand fw-bold fs-4" href="index.jsp">
-                    Hogar <span style="color:var(--azul);">3</span><span style="color:var(--ambar);">6</span><span style="color:var(--oscuro);">0</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="menuPrincipal">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="index.jsp">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="catalogo">Catálogo</a>
-                        </li>
-                    </ul>
-                    <div class="d-flex gap-2">
-                        <a href="acceso.jsp" class="btn btn-outline-claro">Iniciar sesión</a>
-                        <a href="acceso.jsp?panelActivo=registro" class="btn btn-coral">Registrarse</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
+        <jsp:include page="/WEB-INF/jspf/navbar.jsp">
+            <jsp:param name="navTipo" value="publico" />
+            <jsp:param name="navActivo" value="inicio" />
+        </jsp:include>
+
+        <c:if test="${not empty sessionScope.correo}">
+            <c:choose>
+                <c:when test="${sessionScope.roles.contains('Administrador')}">
+                    <c:set var="panelUrl" value="admin/panel" />
+                </c:when>
+                <c:when test="${sessionScope.roles.contains('Inmobiliaria')}">
+                    <c:set var="panelUrl" value="agente/panel" />
+                </c:when>
+                <c:otherwise>
+                    <c:set var="panelUrl" value="cliente/panel" />
+                </c:otherwise>
+            </c:choose>
+        </c:if>
 
                 <!-- Hero -->
         <section class="py-5">
@@ -61,7 +56,14 @@
                         </p>
                         <div class="d-flex gap-3 mb-4">
                             <a href="catalogo" class="btn btn-coral btn-lg">Ver catálogo</a>
-                            <a href="acceso.jsp?panelActivo=registro" class="btn btn-outline-secondary btn-lg">Crear cuenta</a>
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.correo}">
+                                    <a href="${panelUrl}" class="btn btn-outline-secondary btn-lg">Ir a mi panel</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="acceso.jsp?panelActivo=registro" class="btn btn-outline-secondary btn-lg">Crear cuenta</a>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -153,7 +155,7 @@
                 <div class="row g-4">
                     <div class="col-md-4">
                         <h5 class="text-white">
-                            Hogar <span style="color:var(--azul);">3</span><span style="color:var(--ambar);">6</span><span class="text-white">0</span>
+                            Hogar <span style="color:var(--azul-claro);">3</span><span style="color:var(--ambar);">6</span><span class="text-white">0</span>
                         </h5>
                         <p class="text-white-50">
                             Encuentra, publica y gestiona propiedades de forma simple y segura.
@@ -164,8 +166,16 @@
                         <ul class="list-unstyled">
                             <li><a href="index.jsp" class="text-white-50 text-decoration-none">Inicio</a></li>
                             <li><a href="catalogo" class="text-white-50 text-decoration-none">Catálogo</a></li>
-                            <li><a href="acceso.jsp" class="text-white-50 text-decoration-none">Iniciar sesión</a></li>
-                            <li><a  accesskey=""href="acceso.jsp?panelActivo=registro" class="text-white-50 text-decoration-none">Registrarse</a></li>
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.correo}">
+                                    <li><a href="${panelUrl}" class="text-white-50 text-decoration-none">Mi panel</a></li>
+                                    <li><a href="logout" class="text-white-50 text-decoration-none">Cerrar sesión</a></li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li><a href="acceso.jsp" class="text-white-50 text-decoration-none">Iniciar sesión</a></li>
+                                    <li><a href="acceso.jsp?panelActivo=registro" class="text-white-50 text-decoration-none">Registrarse</a></li>
+                                </c:otherwise>
+                            </c:choose>
                         </ul>
                     </div>
                     <div class="col-md-4">

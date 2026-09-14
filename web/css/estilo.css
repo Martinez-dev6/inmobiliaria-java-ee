@@ -8,8 +8,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 */
 
 :root {
-    --azul: #3E7BFA;
-    --coral: #FF6B5E;
+    --azul: #1A2332;
+    --azul-claro: #4FA8FF;
+    --coral: #cc0033;
     --ambar: #FFB648;
     --oscuro: #1A2332;
     --claro: #F4F7FE;
@@ -34,6 +35,7 @@ h1, h2, h3, h4, .navbar-brand {
 
 .navbar-hogar {
     background-color: #fff;
+    border-bottom: 1px solid #eef0f4;
 }
 
 .navbar-hogar .nav-link {
@@ -43,11 +45,11 @@ h1, h2, h3, h4, .navbar-brand {
 }
 .navbar-hogar .nav-link:hover {
     font-weight: 600;
-    color: #000000 !important;
+    color: var(--azul) !important;
 }
 .navbar-hogar .nav-link.active {
     font-weight: 600;
-    color: #000000 !important;
+    color: var(--azul) !important;
 }
 .navbar-hogar .nav-link.active::after {
     content: "";
@@ -56,39 +58,65 @@ h1, h2, h3, h4, .navbar-brand {
     right: 0;
     bottom: -4px;
     height: 2px;
-    background-color: #000000;
+    background-color: var(--azul);
     border-radius: 2px;
 }
 
+.btn-coral\.principal {
+    background-color: var(--coral);
+    color: #fff;
+    border: none;
+}
+
+.btn-coral\.principal:hover {
+    background-color: #000;
+    color: #fff    
+}
+
+
 .btn-coral {
-    background-color: #000000;
+    background-color: #000;
     color: #fff;
     border: none;
 }
 
 .btn-coral:hover {
-    background-color: #cc0033;
+    background-color: var(--coral);
     color: #fff;
 }
 
+.btn-coral-A {
+    background-color: var(--coral);
+    color: #fff;
+    border: none;
+}
+
+.btn-coral-A:hover {
+    background-color: #000;
+    color: #fff 
+}
+
 .btn-outline-claro {
-    color: #000000;
-    border: 1px solid #000000;
+    color: var(--azul);
+    border: 1px solid var(--azul);
+    background-color: transparent;
 }
 
 .btn-outline-claro:hover {
-    background-color: #cc0033;
+    background-color: var(--coral);
     color: #fff;
 }
 
 .btn-outline-secondary{
     background-color: #fff;
     color: var(--oscuro);
+    border: 1px solid #dee2e6;
 }
 
 .btn-outline-secondary:hover{
-    background-color: #cc0033;
+    background-color: #000;
     color: #fff;
+    border-color: var(--azul);
 }
 
 /* ===== Vista de Acceso (login/registro) ===== */
@@ -208,13 +236,12 @@ h1, h2, h3, h4, .navbar-brand {
 
 /* El botón outline invertido: mismo botón, pero legible sobre fondo oscuro */
 .panel-overlay .btn-outline-claro {
-    background-color: #cc0033;
+    background-color: transparent;
     color: #fff;
-    border-color: #000000;
+    border-color: #fff;
 }
 .panel-overlay .btn-outline-claro:hover {
     background-color: #fff;
-    color: #000000;
-    border-color: #000000;
-  
+    color: var(--azul);
+    border-color: #fff;
 }

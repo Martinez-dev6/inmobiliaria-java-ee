@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administrador — Hogar 360</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -12,12 +13,9 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/">Hogar 360</a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-claro btn-sm">Cerrar sesión</a>
-    </div>
-</nav>
+<jsp:include page="/WEB-INF/jspf/navbar.jsp">
+    <jsp:param name="navTipo" value="app" />
+</jsp:include>
 
 <div class="container py-5">
     <h2 class="mb-1">Panel de administración</h2>
@@ -51,21 +49,28 @@
     </div>
 
     <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm p-4 h-100">
+                <h5><i class="bi bi-houses"></i> Propiedades</h5>
+                <p class="text-muted small">Revisa publicaciones, da de baja y contacta al agente.</p>
+                <a href="${pageContext.request.contextPath}/admin/propiedades" class="btn btn-coral btn-sm mt-auto">Gestionar propiedades</a>
+            </div>
+        </div>
+        <div class="col-md-3">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-people"></i> Gestión de roles</h5>
                 <p class="text-muted small">Asigna o revoca roles, activa/inactiva cuentas.</p>
-                <a href="${pageContext.request.contextPath}/admin/roles" class="btn btn-coral btn-sm mt-auto">Ir a gestión de roles</a>
+                <a href="${pageContext.request.contextPath}/admin/roles" class="btn btn-outline-claro btn-sm mt-auto">Ir a gestión de roles</a>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-bar-chart"></i> Reportes</h5>
                 <p class="text-muted small">Propiedades por ciudad y estado.</p>
                 <a href="${pageContext.request.contextPath}/admin/reportes" class="btn btn-outline-claro btn-sm mt-auto">Ver reportes</a>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow-sm p-4 h-100">
                 <h5><i class="bi bi-clipboard-data"></i> Auditoría</h5>
                 <p class="text-muted small">Historial de eventos del sistema.</p>
