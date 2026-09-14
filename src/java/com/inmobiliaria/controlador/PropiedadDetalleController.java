@@ -1,3 +1,5 @@
+package com.inmobiliaria.controlador;
+
 import com.inmobiliaria.dao.FavoritoDAO;
 import com.inmobiliaria.dao.ImagenPropiedadDAO;
 import com.inmobiliaria.dao.PropiedadCaracteristicaDAO;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 @WebServlet(name = "PropiedadDetalleController", urlPatterns = {"/propiedad"})
 public class PropiedadDetalleController extends HttpServlet {
@@ -34,7 +37,18 @@ public class PropiedadDetalleController extends HttpServlet {
         try {
             Propiedad propiedad = propiedadDAO.buscarPorId(idPropiedad);
 
-            if (propiedad == null || !"disponible".equals(propiedad.getEstado())) {
+            HttpSession sesion = request.getSession(false);
+            boolean esAdmin = false;
+            if (sesion != null) {
+                @SuppressWarnings("unchecked")
+                List<String> roles = (List<String>) sesion.getAttribute("roles");
+                esAdmin = roles != null && roles.contains("Administrador");
+            }
+
+            // El catálogo público solo muestra propiedades disponibles, pero el
+            // administrador necesita poder revisar el detalle de cualquiera
+            // (incluida una que él mismo dio de baja) desde su panel de moderación.
+            if (propiedad == null || (!"disponible".equals(propiedad.getEstado()) && !esAdmin)) {
                 response.sendRedirect(request.getContextPath() + "/catalogo");
                 return;
             }
@@ -43,7 +57,6 @@ public class PropiedadDetalleController extends HttpServlet {
             request.setAttribute("imagenes", imagenPropiedadDAO.listarPorPropiedad(idPropiedad));
             request.setAttribute("nombresCaracteristicas", propiedadCaracteristicaDAO.listarNombresPorPropiedad(idPropiedad));
 
-            HttpSession sesion = request.getSession(false);
             if (sesion != null && sesion.getAttribute("idUsuario") != null) {
                 int idUsuario = (int) sesion.getAttribute("idUsuario");
                 request.setAttribute("esFavorita", favoritoDAO.existe(idUsuario, idPropiedad));

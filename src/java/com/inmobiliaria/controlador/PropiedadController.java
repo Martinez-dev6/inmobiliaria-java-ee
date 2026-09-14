@@ -7,6 +7,7 @@ import com.inmobiliaria.dao.InmobiliariaDAO;
 import com.inmobiliaria.dao.PropiedadCaracteristicaDAO;
 import com.inmobiliaria.dao.PropiedadDAO;
 import com.inmobiliaria.dao.TipoPropiedadDAO;
+import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.excepcion.MatriculaDuplicadaException;
 import com.inmobiliaria.modelo.Caracteristica;
 import com.inmobiliaria.modelo.Ciudad;
@@ -44,6 +45,7 @@ public class PropiedadController extends HttpServlet {
     private final ImagenPropiedadDAO imagenPropiedadDAO = new ImagenPropiedadDAO();
     private final CaracteristicaDAO caracteristicaDAO = new CaracteristicaDAO();
     private final PropiedadCaracteristicaDAO propiedadCaracteristicaDAO = new PropiedadCaracteristicaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -183,6 +185,11 @@ public class PropiedadController extends HttpServlet {
             int idGenerado = propiedadDAO.crear(propiedad);
             guardarFotosNuevas(request, idGenerado);
             propiedadCaracteristicaDAO.asignarCaracteristicas(idGenerado, idsCaracteristicas);
+
+            HttpSession sesion = request.getSession(false);
+            int idUsuario = (int) sesion.getAttribute("idUsuario");
+            usuarioDAO.registrarAuditoria(idUsuario, "crear_propiedad",
+                    "Publicó la propiedad id " + idGenerado + " (" + propiedad.getMatriculaInmobiliaria() + ")");
         } catch (MatriculaDuplicadaException e) {
             mostrarFormulario(request, response, propiedad, e.getMessage(), idsCaracteristicas);
             return;
@@ -253,6 +260,11 @@ public class PropiedadController extends HttpServlet {
                 mostrarListado(request, response, "Esa propiedad no existe o no te pertenece.");
                 return;
             }
+
+            HttpSession sesion = request.getSession(false);
+            int idUsuario = (int) sesion.getAttribute("idUsuario");
+            usuarioDAO.registrarAuditoria(idUsuario, "baja".equals(accion) ? "baja_propiedad" : "reactivar_propiedad",
+                    ("baja".equals(accion) ? "Dio de baja" : "Reactivó") + " su propiedad id " + idPropiedad);
         } catch (SQLException e) {
             e.printStackTrace();
             mostrarListado(request, response, "No se pudo actualizar el estado de la propiedad.");

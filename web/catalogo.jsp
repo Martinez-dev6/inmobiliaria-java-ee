@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de propiedades — Hogar 360</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,19 +16,10 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/">Hogar 360</a>
-        <c:choose>
-            <c:when test="${not empty sessionScope.correo}">
-                <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-claro btn-sm">Cerrar sesión</a>
-            </c:when>
-            <c:otherwise>
-                <a href="${pageContext.request.contextPath}/acceso.jsp" class="btn btn-outline-claro btn-sm">Iniciar sesión</a>
-            </c:otherwise>
-        </c:choose>
-    </div>
-</nav>
+<jsp:include page="/WEB-INF/jspf/navbar.jsp">
+    <jsp:param name="navTipo" value="publico" />
+    <jsp:param name="navActivo" value="catalogo" />
+</jsp:include>
 
 <div class="container py-5">
 
@@ -89,8 +81,9 @@
                                 </c:otherwise>
                             </c:choose>
                             <div class="card-body">
+                                <span class="badge mb-2" style="background-color:var(--azul);">${p.nombreTipo}</span>
                                 <h5 class="card-title">${p.titulo}</h5>
-                                <p class="card-text text-muted mb-1">${p.nombreCiudad} · ${p.nombreTipo}</p>
+                                <p class="card-text text-muted mb-1">${p.nombreCiudad}</p>
                                 <p class="card-text fw-bold mb-1">$<fmt:formatNumber value="${p.precio}" pattern="#,##0"/></p>
                                 <p class="card-text small text-muted">Publica: ${p.nombreInmobiliaria}</p>
                                 <a href="${pageContext.request.contextPath}/propiedad?id=${p.idPropiedad}" class="btn btn-outline-claro btn-sm">Ver detalle</a>

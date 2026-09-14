@@ -47,6 +47,43 @@ public class PropiedadDAO {
         return propiedades;
     }
 
+    /**
+     * Lista TODAS las propiedades de TODAS las inmobiliarias, con el correo del
+     * agente dueño de cada una (para el panel de moderación del administrador).
+     */
+    public List<Propiedad> listarTodas() throws SQLException {
+
+        String sql =
+                "SELECT p.id_propiedad, p.id_inmobiliaria, p.id_ciudad, p.id_tipo_propiedad, " +
+                "       p.matricula_inmobiliaria, p.titulo, p.descripcion, p.direccion, " +
+                "       p.precio, p.area_m2, p.estado, p.destacada, p.fecha_publicacion, " +
+                "       c.nombre_ciudad, t.nombre_tipo, i.nombre_comercial, i.telefono_contacto, " +
+                "       u.correo AS correo_inmobiliaria, " +
+                "       (SELECT ip.url_imagen FROM imagen_propiedad ip " +
+                "        WHERE ip.id_propiedad = p.id_propiedad ORDER BY ip.orden LIMIT 1) AS url_miniatura " +
+                "FROM propiedad p " +
+                "JOIN ciudad c ON c.id_ciudad = p.id_ciudad " +
+                "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad " +
+                "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria " +
+                "JOIN usuario u ON u.id_usuario = i.id_usuario " +
+                "ORDER BY p.fecha_publicacion DESC";
+
+        List<Propiedad> propiedades = new ArrayList<>();
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Propiedad p = mapearFila(rs);
+                p.setCorreoInmobiliaria(rs.getString("correo_inmobiliaria"));
+                propiedades.add(p);
+            }
+        }
+
+        return propiedades;
+    }
+
     public Propiedad buscarPorId(int idPropiedad) throws SQLException {
 
         String sql = SELECT_BASE + "WHERE p.id_propiedad = ?";
@@ -132,6 +169,25 @@ public class PropiedadDAO {
             ps.setString(1, nuevoEstado);
             ps.setInt(2, idPropiedad);
             ps.setInt(3, idInmobiliaria);
+
+            return ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Cambia el estado de una propiedad sin restringir por inmobiliaria — solo
+     * para uso del administrador (moderación), a diferencia de cambiarEstado()
+     * que un agente usa sobre sus propias propiedades.
+     */
+    public int cambiarEstadoAdmin(int idPropiedad, String nuevoEstado) throws SQLException {
+
+        String sql = "UPDATE propiedad SET estado = ? WHERE id_propiedad = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idPropiedad);
 
             return ps.executeUpdate();
         }

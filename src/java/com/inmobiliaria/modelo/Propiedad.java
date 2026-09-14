@@ -25,6 +25,7 @@ public class Propiedad {
     private String nombreTipo;
     private String nombreInmobiliaria; // nombre comercial de la agencia (JOIN con inmobiliaria); no es columna de 'propiedad'
     private String telefonoInmobiliaria; // teléfono de contacto de la agencia; no es columna de 'propiedad'
+    private String correoInmobiliaria; // correo de login del dueño de la agencia (JOIN con usuario); solo lo llena PropiedadDAO.listarTodas()
     private String urlMiniatura; // primera foto de la galería (para el listado); no es columna de 'propiedad'
 
     public Propiedad() {
@@ -175,6 +176,14 @@ public class Propiedad {
 
     public void setTelefonoInmobiliaria(String telefonoInmobiliaria) {
         this.telefonoInmobiliaria = telefonoInmobiliaria;
+    }
+
+    public String getCorreoInmobiliaria() {
+        return correoInmobiliaria;
+    }
+
+    public void setCorreoInmobiliaria(String correoInmobiliaria) {
+        this.correoInmobiliaria = correoInmobiliaria;
     }
 
     public String getUrlMiniatura() {

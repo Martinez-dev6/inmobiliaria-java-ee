@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis propiedades — Hogar 360</title>
+    <title>Gestión de propiedades — Hogar 360</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -18,65 +18,55 @@
 
 <jsp:include page="/WEB-INF/jspf/navbar.jsp">
     <jsp:param name="navTipo" value="volver" />
-    <jsp:param name="navDestino" value="agente/panel" />
+    <jsp:param name="navDestino" value="admin/panel" />
     <jsp:param name="navTexto" value="Volver al panel" />
 </jsp:include>
 
 <div class="container py-5">
+    <h2 class="mb-1">Gestión de propiedades</h2>
+    <p class="text-muted mb-4">Todas las propiedades publicadas por todas las inmobiliarias del sistema.</p>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Mis propiedades</h2>
-        <a href="${pageContext.request.contextPath}/agente/propiedades?accion=nuevo" class="btn btn-coral btn-sm">
-            <i class="bi bi-plus-lg"></i> Nueva propiedad
-        </a>
-    </div>
-
-    <c:if test="${not empty errorPropiedad}">
-        <div class="alerta-error mb-3">${errorPropiedad}</div>
-    </c:if>
-    <c:if test="${not empty mensaje}">
-        <div class="alerta-exito mb-3">${mensaje}</div>
+    <c:if test="${not empty errorPropiedades}">
+        <div class="alerta-error mb-4">${errorPropiedades}</div>
     </c:if>
 
     <c:choose>
         <c:when test="${empty propiedades}">
-            <p class="text-muted">Todavía no has publicado ninguna propiedad.</p>
+            <p class="text-muted">No hay propiedades registradas todavía.</p>
         </c:when>
         <c:otherwise>
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead>
                         <tr>
-                            <th>Foto</th>
-                            <th>Matrícula</th>
-                            <th>Título</th>
-                            <th>Ciudad</th>
-                            <th>Tipo</th>
+                            <th>Propiedad</th>
+                            <th>Inmobiliaria</th>
+                            <th>Ciudad / Tipo</th>
                             <th>Precio</th>
                             <th>Estado</th>
-                            <th>Acciones</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach var="p" items="${propiedades}">
-                                                        <tr>
+                            <tr>
                                 <td>
-                                    <c:choose>
-                                        <c:when test="${not empty p.urlMiniatura}">
-                                            <img src="${pageContext.request.contextPath}/${p.urlMiniatura}"
-                                                 alt="${p.titulo}"
-                                                 style="width:60px;height:60px;object-fit:cover;border-radius:6px;"
-                                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2760%27 height=%2760%27%3E%3Crect width=%2760%27 height=%2760%27 fill=%27%23e0e0e0%27/%3E%3C/svg%3E'">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div style="width:60px;height:60px;background:#e0e0e0;border-radius:6px;"></div>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <a href="${pageContext.request.contextPath}/propiedad?id=${p.idPropiedad}"
+                                       class="fw-semibold text-decoration-none" target="_blank">${p.titulo}</a>
+                                    <div class="text-muted small">${p.matriculaInmobiliaria}</div>
                                 </td>
-                                <td>${p.matriculaInmobiliaria}</td>
-                                <td>${p.titulo}</td>
-                                <td>${p.nombreCiudad}</td>
-                                <td>${p.nombreTipo}</td>
+                                <td>
+                                    <div>${p.nombreInmobiliaria}</div>
+                                    <div class="text-muted small">
+                                        <c:if test="${not empty p.correoInmobiliaria}">
+                                            <i class="bi bi-envelope"></i> ${p.correoInmobiliaria}<br>
+                                        </c:if>
+                                        <c:if test="${not empty p.telefonoInmobiliaria}">
+                                            <i class="bi bi-telephone"></i> ${p.telefonoInmobiliaria}
+                                        </c:if>
+                                    </div>
+                                </td>
+                                <td>${p.nombreCiudad} / ${p.nombreTipo}</td>
                                 <td>$<fmt:formatNumber value="${p.precio}" pattern="#,##0"/></td>
                                 <td>
                                     <c:choose>
@@ -87,24 +77,21 @@
                                             <span class="badge bg-secondary">Inactiva</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge bg-info text-dark">${p.estado}</span>
+                                            <span class="badge bg-info text-dark text-capitalize">${p.estado}</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/agente/propiedades?accion=editar&id=${p.idPropiedad}"
-                                       class="btn btn-outline-secondary btn-sm">Editar</a>
-
-                                    <form action="${pageContext.request.contextPath}/agente/propiedades" method="post" class="d-inline">
+                                    <form action="${pageContext.request.contextPath}/admin/propiedades" method="post" class="d-inline">
                                         <input type="hidden" name="idPropiedad" value="${p.idPropiedad}">
                                         <c:choose>
-                                            <c:when test="${p.estado == 'disponible'}">
-                                                <input type="hidden" name="accion" value="baja">
-                                                <button type="submit" class="btn btn-outline-secondary btn-sm">Dar de baja</button>
+                                            <c:when test="${p.estado == 'inactiva'}">
+                                                <input type="hidden" name="accion" value="reactivar">
+                                                <button type="submit" class="btn btn-coral btn-sm">Reactivar</button>
                                             </c:when>
                                             <c:otherwise>
-                                                <input type="hidden" name="accion" value="reactivar">
-                                                <button type="submit" class="btn btn-outline-claro btn-sm">Reactivar</button>
+                                                <input type="hidden" name="accion" value="baja">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm">Dar de baja</button>
                                             </c:otherwise>
                                         </c:choose>
                                     </form>
@@ -116,7 +103,6 @@
             </div>
         </c:otherwise>
     </c:choose>
-
 </div>
 
 <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
