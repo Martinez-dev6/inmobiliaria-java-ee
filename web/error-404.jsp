@@ -19,7 +19,7 @@
         <h1>404 — Página no encontrada</h1>
         <p class="text-muted mb-4">La página que buscas no existe o fue movida.</p>
         <a href="${pageContext.request.contextPath}/" class="btn btn-coral">
-            <i class="bi bi-arrow-left"></i> Volver al inicio
+            <i class="bi bi-house-door"></i> Ir al inicio
         </a>
     </div>
     <script src="${pageContext.request.contextPath}/js/transicion.js"></script>

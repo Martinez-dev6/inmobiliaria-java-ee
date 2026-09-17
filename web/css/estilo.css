@@ -14,6 +14,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     --ambar: #FFB648;
     --oscuro: #1A2332;
     --claro: #F4F7FE;
+    /* Tinte claro del coral de los botones: el coral puro no contrasta
+       sobre el azul oscuro, pero este sí y mantiene la misma familia. */
+    --coral-claro: #FF7D98;
 }
 
 body {
@@ -114,9 +117,9 @@ h1, h2, h3, h4, .navbar-brand {
 }
 
 .btn-outline-secondary:hover{
-    background-color: #000;
+    background-color: var(--coral);
     color: #fff;
-    border-color: var(--azul);
+    border-color: var(--coral);
 }
 
 /* ===== Vista de Acceso (login/registro) ===== */
@@ -218,21 +221,53 @@ h1, h2, h3, h4, .navbar-brand {
     font-size: 0.9rem;
 }
 
+/* Salida de la pantalla de acceso. En pantallas anchas cabe en el margen que
+   queda a la izquierda de la tarjeta; por debajo de ~1050px la tarjeta ya le
+   llega encima, así que deja de estar centrada y le cede una franja arriba. */
+.boton-inicio-acceso {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 50;
+}
+
+@media (max-width: 1050px) {
+    .fondo-acceso { align-items: flex-start; padding-top: 64px; }
+    .boton-inicio-acceso { top: 14px; left: 14px; }
+}
+
+/* Enlaces para cambiar de formulario en celular (el panel deslizante no cabe). */
 .switch-movil { display: none; }
 
 @media (max-width: 768px) {
-    .contenedor-acceso { width: 100%; height: auto; min-height: 100vh; border-radius: 0; }
+    .contenedor-acceso { width: 100%; height: auto; min-height: calc(100vh - 64px); border-radius: 0; }
     .panel-overlay { display: none; }
     .formulario-panel { position: relative; width: 100%; padding: 40px 24px; transform: none !important; transition: none; }
     .formulario-login { display: flex; opacity: 1 !important; pointer-events: auto !important; }
     .formulario-registro { display: none; opacity: 1 !important; pointer-events: auto !important; }
     .contenedor-acceso.derecha-activa .formulario-login { display: none; }
     .contenedor-acceso.derecha-activa .formulario-registro { display: flex; }
-    .switch-movil { display: block; text-align: center; padding: 0 24px 30px; font-size: 0.9rem; }
+    .switch-movil { display: block; }
     .switch-movil-registro { display: none; }
     .contenedor-acceso.derecha-activa .switch-movil-login { display: none; }
     .contenedor-acceso.derecha-activa .switch-movil-registro { display: block; }
 }
+
+.switch-movil {
+    text-align: center;
+    margin: 0 24px;
+    padding: 18px 0 30px;
+    border-top: 1px solid #eef1f7;
+    font-size: 0.9rem;
+    color: #6f7a8d;
+}
+.switch-movil a {
+    color: var(--coral);
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 4px;
+}
+.switch-movil a:hover { text-decoration: underline; }
 
 /* El botón outline invertido: mismo botón, pero legible sobre fondo oscuro */
 .panel-overlay .btn-outline-claro {
@@ -245,3 +280,887 @@ h1, h2, h3, h4, .navbar-brand {
     color: var(--azul);
     border-color: #fff;
 }
+/* ===== Galería de la ficha de propiedad ===== */
+.galeria-vacia {
+    height: 320px;
+    border-radius: 16px;
+    background: var(--claro);
+    border: 1px dashed #d4dbe8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #8a94a6;
+}
+.galeria-vacia i { font-size: 2rem; }
+
+.galeria-principal {
+    position: relative;
+    margin: 0 0 12px;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: zoom-in;
+    background: var(--claro);
+}
+.galeria-principal img {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+.galeria-principal:hover img { transform: scale(1.02); }
+.galeria-principal:focus-visible { outline: 2px solid var(--azul); outline-offset: 3px; }
+
+.galeria-lupa,
+.galeria-contador {
+    position: absolute;
+    bottom: 14px;
+    background: rgba(26, 35, 50, 0.78);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+}
+.galeria-lupa { left: 14px; opacity: 0; transition: opacity 0.2s ease; }
+.galeria-principal:hover .galeria-lupa,
+.galeria-principal:focus-visible .galeria-lupa { opacity: 1; }
+.galeria-contador { right: 14px; }
+
+.galeria-miniaturas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 10px;
+}
+.galeria-miniatura {
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+    line-height: 0;
+}
+.galeria-miniatura img { width: 100%; height: 72px; object-fit: cover; opacity: 0.75; transition: opacity 0.2s ease; }
+.galeria-miniatura:hover img { opacity: 1; }
+.galeria-miniatura.activa { border-color: var(--azul); }
+.galeria-miniatura.activa img { opacity: 1; }
+
+.galeria-unica .galeria-miniaturas { display: none; }
+.galeria-unica .galeria-contador { display: none; }
+
+/* ===== Visor a pantalla completa ===== */
+body.sin-desplazamiento { overflow: hidden; }
+
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(12, 17, 26, 0.94);
+    padding: 40px 16px;
+}
+.lightbox.abierto { display: flex; }
+
+.lightbox-imagen {
+    max-width: 92vw;
+    max-height: 86vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-nav,
+.lightbox-cerrar {
+    position: absolute;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.lightbox-nav { width: 52px; height: 52px; font-size: 1.4rem; top: 50%; transform: translateY(-50%); }
+.lightbox-nav:hover { background: var(--coral); color: #fff; }
+.lightbox-anterior { left: 24px; }
+.lightbox-siguiente { right: 24px; }
+
+.lightbox-cerrar { top: 20px; right: 24px; width: 44px; height: 44px; font-size: 1.1rem; }
+.lightbox-cerrar:hover { background: var(--coral); }
+
+.lightbox-contador {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+}
+.lightbox-unica .lightbox-nav,
+.lightbox-unica .lightbox-contador { display: none; }
+
+@media (max-width: 768px) {
+    .galeria-principal img { height: 260px; }
+    .lightbox-nav { width: 42px; height: 42px; font-size: 1.1rem; }
+    .lightbox-anterior { left: 8px; }
+    .lightbox-siguiente { right: 8px; }
+}
+
+/* ===== Piezas de panel (métricas y accesos rápidos) ===== */
+.panel-metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 26px;
+}
+.panel-metrica {
+    padding: 20px 24px;
+    border-left: 1px solid #eef1f6;
+}
+.panel-metrica:first-child { border-left: none; }
+.panel-metrica .cifra {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.9rem;
+    line-height: 1.1;
+}
+.panel-metrica .rotulo {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7d879a;
+    margin-top: 4px;
+}
+.panel-metrica .cifra.alerta { color: var(--coral); }
+.panel-metrica .cifra.activa { color: #1e7e34; }
+
+.panel-titulo-seccion {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7d879a;
+    margin-bottom: 10px;
+}
+
+.panel-accesos {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.acceso-rapido {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    text-decoration: none;
+    color: var(--oscuro);
+    border-top: 1px solid #f1f3f8;
+    transition: background 0.18s ease;
+}
+.acceso-rapido:first-child { border-top: none; }
+.acceso-rapido:hover { background: var(--claro); color: var(--oscuro); }
+
+.acceso-icono {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--claro);
+    color: var(--azul);
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+.acceso-rapido:hover .acceso-icono { background: var(--coral); color: #fff; }
+
+.acceso-titulo { font-weight: 600; display: block; }
+.acceso-detalle { font-size: 0.86rem; color: #7d879a; }
+.acceso-flecha { margin-left: auto; color: #c2cad8; font-size: 1.1rem; transition: transform 0.18s ease, color 0.18s ease; }
+.acceso-rapido:hover .acceso-flecha { color: var(--coral); transform: translateX(4px); }
+
+@media (max-width: 576px) {
+    .panel-metrica { border-left: none; border-top: 1px solid #eef1f6; }
+    .panel-metrica:first-child { border-top: none; }
+}
+
+
+/* Botón claro sobre fondo oscuro (barra lateral, banners). */
+.btn-sobre-oscuro {
+    background-color: #fff;
+    color: var(--oscuro);
+    border: none;
+}
+.btn-sobre-oscuro:hover { background-color: var(--coral); color: #fff; }
+
+/* ===== Tablas ===== */
+.tabla-hogar {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.tabla-hogar .table { margin-bottom: 0; }
+.tabla-hogar .table > thead > tr > th {
+    background: var(--claro);
+    border-bottom: 1px solid #e7ebf3;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6f7a8d;
+    font-weight: 600;
+    padding: 14px 16px;
+    white-space: nowrap;
+}
+.tabla-hogar .table > tbody > tr > td {
+    padding: 14px 16px;
+    border-color: #f1f3f8;
+    vertical-align: middle;
+}
+.tabla-hogar .table > tbody > tr:last-child > td { border-bottom: none; }
+.tabla-hogar .table > tbody > tr:hover > td { background: #fbfcfe; }
+.tabla-hogar .table > tfoot > tr > td {
+    padding: 14px 16px;
+    background: var(--claro);
+    border-top: 1px solid #e7ebf3;
+}
+
+/* ===== Tarjeta genérica de listado ===== */
+.tarjeta-hogar {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    padding: 20px 22px;
+}
+.tarjeta-hogar + .tarjeta-hogar { margin-top: 14px; }
+
+/* ===== Estado vacío ===== */
+.estado-vacio {
+    background: #fff;
+    border: 1px dashed #d8dfec;
+    border-radius: 16px;
+    padding: 46px 24px;
+    text-align: center;
+    color: #7d879a;
+}
+/* Sólo el icono suelto del bloque vacío, no los que van dentro de un botón. */
+.estado-vacio > i { font-size: 2rem; display: block; margin-bottom: 10px; color: #c2cad8; }
+
+/* ===== Barra de filtros ===== */
+.barra-filtros {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    padding: 18px 20px;
+}
+.barra-filtros .form-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6f7a8d;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* ===== Paginación ===== */
+/* Centrado: en rejillas anchas (catálogo) los botones quedaban pegados al
+   borde derecho y muy lejos del último resultado. */
+.paginacion-hogar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+}
+.paginacion-hogar .paginacion-resumen { color: #7d879a; font-size: 0.86rem; }
+.paginacion-hogar .paginacion-botones { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.paginacion-hogar .pagina {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e0e6f0;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--oscuro);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.paginacion-hogar .pagina:hover { background: var(--claro); border-color: #cdd6e6; }
+.paginacion-hogar .pagina.activa {
+    background: var(--oscuro);
+    border-color: var(--oscuro);
+    color: #fff;
+    font-weight: 600;
+}
+.paginacion-hogar .pagina.desactivada {
+    color: #c2cad8;
+    pointer-events: none;
+    background: #fbfcfe;
+}
+.paginacion-hogar .pagina-puntos { color: #b9c2d0; padding: 0 2px; align-self: center; }
+
+/* =========================================================
+   Shell de aplicación (paneles de admin, inmobiliaria y cliente)
+   Barra lateral fija + barra superior + área de contenido.
+   ========================================================= */
+/* El marco del panel no se mueve: la ventana no se desplaza nunca y el único
+   que rueda es el área de contenido (.app-contenido). Así la barra lateral y
+   la barra superior con el título y la acción principal quedan siempre a la
+   vista, por larga que sea la tabla de abajo. */
+body.cuerpo-app {
+    background: #F6F8FC;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app { display: flex; height: 100vh; align-items: stretch; overflow: hidden; }
+
+.app-lateral {
+    flex: 0 0 250px;
+    width: 250px;
+    background: var(--oscuro);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 12px;
+    /* Ya no necesita "sticky": el marco entero mide exactamente la ventana, así
+       que la barra no se mueve. Si el menú creciera, rueda dentro de ella. */
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.app-marca {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.12rem;
+    color: #fff;
+    text-decoration: none;
+    padding: 2px 12px 12px;
+    display: block;
+}
+.app-marca:hover { color: #fff; }
+
+.app-nav { display: flex; flex-direction: column; gap: 2px; }
+.app-nav-titulo {
+    font-size: 0.66rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    padding: 12px 12px 5px;
+}
+.app-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 12px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.74);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.app-nav-item i { font-size: 1rem; width: 18px; text-align: center; }
+.app-nav-item:hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+.app-nav-item.activo { background: #fff; color: var(--oscuro); font-weight: 600; }
+.app-nav-item.activo i { color: var(--coral); }
+.app-nav-contador {
+    margin-left: auto;
+    background: var(--coral);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 8px;
+}
+
+.app-pie { margin-top: auto; padding-top: 14px; }
+.app-usuario {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 11px;
+}
+.app-usuario-cabecera { display: flex; align-items: center; gap: 10px; }
+.app-avatar {
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--coral);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+}
+.app-usuario-datos { min-width: 0; }
+.app-usuario-correo {
+    font-size: 0.82rem;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.app-usuario-rol {
+    font-size: 0.7rem;
+    color: var(--coral-claro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.app-cambio-rol {
+    margin-top: 9px;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    padding-top: 8px;
+}
+.app-cambio-rol .titulo {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 4px;
+    display: block;
+}
+.app-cambio-rol a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.84rem;
+    padding: 3px 0;
+}
+.app-cambio-rol a:hover { color: var(--coral-claro); }
+
+/* El menú más largo (panel de Cliente en una cuenta con los tres roles, que
+   además saca el bloque "Cambiar de panel") pide unos 620px. En una ventana
+   más baja que eso —un portátil de 1366x768 con barra de marcadores, por
+   ejemplo— se aprieta un punto más en vez de sacar la barra de desplazamiento. */
+@media (max-height: 660px) {
+    .app-lateral { padding: 10px 12px; }
+    .app-marca { font-size: 1.05rem; padding: 2px 12px 8px; }
+    .app-nav-titulo { padding: 9px 12px 4px; }
+    .app-nav-item { padding: 5px 12px; font-size: 0.87rem; }
+    .app-nav-item i { font-size: 0.95rem; }
+    .app-pie { padding-top: 10px; }
+    .app-usuario { padding: 9px; }
+    .app-avatar { width: 30px; height: 30px; font-size: 0.85rem; }
+}
+
+/* min-height:0 es lo que permite que el hijo con scroll se encoja: sin eso un
+   item de flex nunca baja de su altura de contenido y el desbordamiento se
+   iria otra vez a la ventana. */
+.app-principal { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+
+.app-barra {
+    flex: 0 0 auto;
+    background: #fff;
+    border-bottom: 1px solid #e7ebf3;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.app-barra h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin: 0;
+    color: var(--oscuro);
+}
+.app-barra .app-descripcion { margin: 3px 0 0; color: #7d879a; font-size: 0.87rem; }
+.app-barra-acciones { display: flex; align-items: center; gap: 10px; }
+.app-barra-titulo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.app-contenido { padding: 26px 28px 40px; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+
+.boton-menu {
+    display: none;
+    border: 1px solid #e0e6f0;
+    background: #fff;
+    border-radius: 10px;
+    width: 40px; height: 40px;
+    align-items: center;
+    justify-content: center;
+    color: var(--oscuro);
+    font-size: 1.1rem;
+}
+
+.app-velo {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 17, 26, 0.45);
+    z-index: 1040;
+}
+.app-velo.visible { display: block; }
+
+@media (max-width: 992px) {
+    .app-lateral {
+        position: fixed;
+        left: 0; top: 0;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+    }
+    .app-lateral.abierta { transform: translateX(0); }
+    .boton-menu { display: inline-flex; }
+    .app-barra { padding: 14px 18px; }
+    .app-contenido { padding: 20px 18px 44px; }
+}
+
+/* ===== Rejilla de dos columnas del panel ===== */
+.panel-columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+@media (max-width: 992px) {
+    .panel-columnas { grid-template-columns: 1fr; }
+}
+
+/* ===== Tarjeta de bloque con cabecera ===== */
+.bloque {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.bloque + .bloque { margin-top: 22px; }
+.bloque-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f3f8;
+}
+.bloque-cabecera h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--oscuro);
+}
+.bloque-cabecera a { font-size: 0.83rem; text-decoration: none; color: var(--coral); }
+.bloque-cuerpo { padding: 18px 20px; }
+.bloque-cuerpo.sin-relleno { padding: 0; }
+
+/* ===== Métricas con icono ===== */
+.metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+.metrica {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.metrica-icono {
+    flex: 0 0 auto;
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    background: var(--claro);
+    color: var(--azul);
+}
+.metrica-icono.acento { background: rgba(204, 0, 51, 0.10); color: var(--coral); }
+.metrica-icono.exito { background: rgba(30, 126, 52, 0.10); color: #1e7e34; }
+.metrica-cifra {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.7rem;
+    line-height: 1.1;
+    color: var(--oscuro);
+}
+.metrica-rotulo {
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #7d879a;
+    margin-top: 2px;
+}
+
+/* ===== Lista compacta (próximas citas, ciudades...) ===== */
+.lista-compacta { list-style: none; margin: 0; padding: 0; }
+.lista-compacta li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 20px;
+    border-top: 1px solid #f1f3f8;
+}
+.lista-compacta li:first-child { border-top: none; }
+.lista-compacta .principal { min-width: 0; }
+.lista-compacta .principal strong { display: block; font-weight: 600; font-size: 0.92rem; }
+.lista-compacta .principal span { font-size: 0.82rem; color: #7d879a; }
+.lista-compacta .derecha { margin-left: auto; text-align: right; white-space: nowrap; }
+
+/* ===== Catálogo con rail de filtros ===== */
+.catalogo-columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 26px;
+    align-items: start;
+}
+.filtros-rail {
+    position: sticky;
+    top: 20px;
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    padding: 20px;
+}
+.filtros-rail h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+.filtros-grupo { padding-top: 16px; border-top: 1px solid #f1f3f8; margin-top: 16px; }
+.filtros-grupo .form-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6f7a8d;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+@media (max-width: 992px) {
+    .catalogo-columnas { grid-template-columns: 1fr; }
+    /* El que ordena es el <aside>, que es el hijo de la rejilla: puesto sobre el
+       formulario de dentro, "order" no hacía nada y los filtros caían al final
+       de la lista de propiedades. */
+    .catalogo-columnas > aside { order: -1; }
+    .filtros-rail { position: static; }
+}
+
+/* ===== Campo de moneda ===== */
+.campo-moneda { position: relative; }
+.campo-moneda .simbolo {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a94a6;
+    pointer-events: none;
+    font-size: 0.92rem;
+}
+.campo-moneda input { padding-left: 26px; }
+
+/* ===== Chips de estado del reporte ===== */
+.chip-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid #e0e6f0;
+    background: #fff;
+    color: var(--oscuro);
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.chip-estado:hover { border-color: var(--coral); background: rgba(204, 0, 51, 0.05); color: var(--oscuro); }
+.chip-estado .punto { width: 8px; height: 8px; border-radius: 50%; background: #adb5bd; }
+.chip-estado .punto.disponible { background: #1e7e34; }
+.chip-estado .punto.inactiva { background: #6c757d; }
+.chip-estado .punto.arrendada { background: #0dcaf0; }
+.chip-estado .punto.vendida { background: var(--coral); }
+.chip-estado .conteo { font-weight: 600; }
+
+/* ===== Aviso para visitantes ===== */
+/* Tarjeta blanca como las demás de la ficha; el acento rojo de la marca
+   entra por el icono y el botón, no por un bloque oscuro que rompía la página. */
+.aviso-visitante {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-radius: 16px;
+    padding: 24px 22px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(26, 35, 50, 0.05);
+}
+.aviso-visitante .icono {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    background: rgba(204, 0, 51, 0.10);
+    color: var(--coral);
+    display: grid;
+    place-items: center;
+    font-size: 1.3rem;
+}
+.aviso-visitante h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: var(--oscuro);
+    margin: 0;
+}
+.aviso-visitante p { color: #6f7a8d; font-size: 0.88rem; margin: 8px 0 16px; }
+
+/* ===== Fila de lista que es un enlace completo =====
+   Para resúmenes tipo "Distribución por ciudad": en vez de un botón con el
+   número y una flecha, la fila entera navega y el número se lee como dato. */
+.lista-compacta li.fila-enlace { padding: 0; }
+.lista-compacta li.fila-enlace > a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 13px 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+}
+.lista-compacta li.fila-enlace > a:hover { background: var(--claro); }
+
+.conteo-fila { text-align: right; line-height: 1.15; }
+.conteo-fila .numero {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--oscuro);
+}
+.conteo-fila .unidad {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #8a94a6;
+}
+.lista-compacta .chevron {
+    color: #c2cad8;
+    font-size: 0.95rem;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+.lista-compacta li.fila-enlace > a:hover .chevron {
+    color: var(--coral);
+    transform: translateX(3px);
+}
+
+/* Puntos de color del desglose por estado, en línea con el resumen. */
+.punto-estado {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #adb5bd;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.punto-estado.disponible { background: #1e7e34; }
+.punto-estado.inactiva { background: #6c757d; }
+.punto-estado.arrendada { background: #0dcaf0; }
+.punto-estado.vendida { background: var(--coral); }
+
+/* ===== Aviso explicativo (cuenta sin inmobiliaria, etc.) ===== */
+.aviso-configuracion {
+    background: #fff;
+    border: 1px solid #e7ebf3;
+    border-left: 4px solid var(--coral);
+    border-radius: 16px;
+    padding: 22px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+.aviso-configuracion .icono {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(204, 0, 51, 0.10);
+    color: var(--coral);
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+}
+.aviso-configuracion h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+.aviso-configuracion p { color: #6f7a8d; font-size: 0.9rem; margin: 0 0 6px; }
+.aviso-configuracion ul { color: #6f7a8d; font-size: 0.9rem; margin: 0 0 14px; padding-left: 18px; }
+
+/* Lista de casillas del rail de filtros: si son muchas, se desplaza dentro. */
+.lista-casillas {
+    max-height: 190px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.lista-casillas .form-check { margin-bottom: 2px; }
+.lista-casillas .form-check-label { font-size: 0.9rem; }
+.lista-casillas .form-check-input:checked { background-color: var(--coral); border-color: var(--coral); }
+
+/* =========================================================
+   Acciones bloqueadas por una regla del sistema
+   No son un error ni un estado: son un "desde aquí no se puede, y este es
+   el motivo". Ocupan el mismo hueco que el botón al que sustituyen para que
+   las columnas de la tabla de roles no bailen de una fila a otra.
+   ========================================================= */
+
+/* Rol que la cuenta tiene y que esta pantalla no puede quitarle. Deliberadamente
+   sin relleno sólido: si pareciera un botón invitaría a pulsarlo, y lo que dice
+   es justo lo contrario. El candado va en coral para que se lea de un vistazo. */
+.rol-bloqueado {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 31px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--claro);
+    border: 1px solid #e3e9f4;
+    color: var(--oscuro);
+    font-size: 0.79rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: help;
+}
+.rol-bloqueado i {
+    font-size: 0.76rem;
+    color: var(--coral);
+}
+
+/* Misma pastilla para el rol que esa cuenta NO tiene. Conserva la forma y el
+   tamaño —si no, una fila con tres roles y otra con uno salían con dibujos
+   distintos— pero va apagada y con el borde punteado: lo que dice es "no lo
+   tiene, y tampoco se lo puedes dar desde aquí". */
+.rol-bloqueado.sin {
+    background: transparent;
+    border-style: dashed;
+    border-color: #dfe5ef;
+    color: #9aa4b5;
+    font-weight: 500;
+}
+.rol-bloqueado.sin i { color: #c2cad8; }

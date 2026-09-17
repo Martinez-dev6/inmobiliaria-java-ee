@@ -97,7 +97,11 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">Presupuesto máx.</label>
-                            <input type="number" name="precioMax" class="form-control" placeholder="Ej. 300000000">
+                            <div class="campo-moneda">
+                                <span class="simbolo">$</span>
+                                <input type="text" inputmode="numeric" data-moneda name="precioMax"
+                                       class="form-control" placeholder="300.000.000">
+                            </div>
                         </div>
                         <div class="col-md-1 d-grid">
                             <button type="submit" class="btn btn-coral">
@@ -125,19 +129,19 @@
                                         <c:choose>
                                             <c:when test="${not empty p.urlMiniatura}">
                                                 <img src="${pageContext.request.contextPath}/${p.urlMiniatura}"
-                                                     class="card-img-top" alt="${p.titulo}" style="height:200px; object-fit:cover;"
+                                                     class="card-img-top" alt="${p.titulo}" style="height:200px; object-fit:cover;" loading="lazy"
                                                      onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27200%27%3E%3Crect width=%27400%27 height=%27200%27 fill=%27%23e0e0e0%27/%3E%3C/svg%3E'">
                                             </c:when>
                                             <c:otherwise>
                                                 <div style="height:200px;background:#e0e0e0;"></div>
                                             </c:otherwise>
                                         </c:choose>
-                                        <div class="card-body">
-                                            <span class="badge mb-2" style="background-color:var(--azul);">${p.nombreTipo}</span>
+                                        <div class="card-body d-flex flex-column">
+                                            <span class="badge mb-2 align-self-start" style="background-color:var(--azul);">${p.nombreTipo}</span>
                                             <h5 class="card-title">${p.titulo}</h5>
                                             <p class="card-text text-muted mb-1">${p.nombreCiudad}</p>
                                             <p class="card-text fw-bold fs-5">$<fmt:formatNumber value="${p.precio}" pattern="#,##0"/></p>
-                                            <a href="${pageContext.request.contextPath}/propiedad?id=${p.idPropiedad}" class="btn btn-outline-claro w-100">Ver detalle</a>
+                                            <a href="${pageContext.request.contextPath}/propiedad?id=${p.idPropiedad}" class="btn btn-outline-claro w-100 mt-auto">Ver detalle</a>
                                         </div>
                                     </div>
                                 </div>
@@ -195,6 +199,7 @@
                         
         <!-- Bootstrap JS (CDN) -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="${pageContext.request.contextPath}/js/moneda.js"></script>
         <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
     </body>
 </html>

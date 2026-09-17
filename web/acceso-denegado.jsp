@@ -20,7 +20,7 @@
         <p class="text-muted mb-4">No tienes permiso para ver esta página, o tu sesión expiró.</p>
         <div class="d-flex gap-2 justify-content-center">
             <a href="${pageContext.request.contextPath}/" class="btn btn-outline-claro">
-                <i class="bi bi-arrow-left"></i> Volver al inicio
+                <i class="bi bi-house-door"></i> Ir al inicio
             </a>
             <a href="acceso.jsp" class="btn btn-coral">Ir a iniciar sesión</a>
         </div>

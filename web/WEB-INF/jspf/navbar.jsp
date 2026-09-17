@@ -30,20 +30,27 @@
                             <a class="nav-link ${param.navActivo == 'catalogo' ? 'active' : ''}" href="${pageContext.request.contextPath}/catalogo">Catálogo</a>
                         </li>
                     </ul>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <c:choose>
                             <c:when test="${not empty sessionScope.correo}">
-                                <c:choose>
-                                    <c:when test="${sessionScope.roles.contains('Administrador')}">
-                                        <a href="${pageContext.request.contextPath}/admin/panel" class="btn btn-outline-claro btn-sm">Mi panel</a>
-                                    </c:when>
-                                    <c:when test="${sessionScope.roles.contains('Inmobiliaria')}">
-                                        <a href="${pageContext.request.contextPath}/agente/panel" class="btn btn-outline-claro btn-sm">Mi panel</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/cliente/panel" class="btn btn-outline-claro btn-sm">Mi panel</a>
-                                    </c:otherwise>
-                                </c:choose>
+                                <%-- Una cuenta puede tener varios roles a la vez. Se ofrece un
+                                     acceso por cada panel al que de verdad puede entrar: con una
+                                     sola opción "Mi panel" los demás quedaban inalcanzables. --%>
+                                <c:if test="${sessionScope.roles.contains('Administrador')}">
+                                    <a href="${pageContext.request.contextPath}/admin/panel" class="btn btn-outline-claro btn-sm">
+                                        <i class="bi bi-shield-check"></i> Administrador
+                                    </a>
+                                </c:if>
+                                <c:if test="${sessionScope.roles.contains('Inmobiliaria')}">
+                                    <a href="${pageContext.request.contextPath}/agente/panel" class="btn btn-outline-claro btn-sm">
+                                        <i class="bi bi-building"></i> Inmobiliaria
+                                    </a>
+                                </c:if>
+                                <c:if test="${sessionScope.roles.contains('Cliente')}">
+                                    <a href="${pageContext.request.contextPath}/cliente/panel" class="btn btn-outline-claro btn-sm">
+                                        <i class="bi bi-person"></i> Mi cuenta
+                                    </a>
+                                </c:if>
                                 <a href="${pageContext.request.contextPath}/logout" class="btn btn-coral btn-sm">Cerrar sesión</a>
                             </c:when>
                             <c:otherwise>
@@ -64,7 +71,7 @@
             </c:when>
             <c:otherwise>
                 <a href="${pageContext.request.contextPath}/${param.navDestino}" class="btn btn-outline-claro btn-sm">
-                    <i class="bi bi-arrow-left"></i> ${param.navTexto}
+                    ${param.navTexto}
                 </a>
             </c:otherwise>
         </c:choose>

@@ -16,8 +16,8 @@
 </head>
 <body class="fondo-acceso">
 
-    <a href="${pageContext.request.contextPath}/" class="btn btn-outline-claro btn-sm" style="position:fixed; top:20px; left:20px; z-index:50;">
-        <i class="bi bi-arrow-left"></i> Volver al inicio
+    <a href="${pageContext.request.contextPath}/" class="btn btn-coral btn-sm boton-inicio-acceso">
+        <i class="bi bi-house-door"></i> Ir al inicio
     </a>
 
     <div class="contenedor-acceso ${(panelActivo == 'registro' or animarRegreso or param.panelActivo == 'registro') ? 'derecha-activa' : ''}"
@@ -48,7 +48,7 @@
             <input type="password" class="form-control" id="contrasenaLogin" name="contrasena" required minlength="6">
         </div>
 
-        <button type="submit" class="btn btn-coral">Iniciar sesión</button>
+        <button type="submit" class="btn btn-coral-A">Iniciar sesión</button>
     </form>
 </div>
 

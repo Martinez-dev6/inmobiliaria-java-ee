@@ -19,7 +19,7 @@
         <h1>Algo salió mal</h1>
         <p class="text-muted mb-4">Ocurrió un error inesperado en el servidor. Intenta de nuevo en unos minutos.</p>
         <a href="${pageContext.request.contextPath}/" class="btn btn-coral">
-            <i class="bi bi-arrow-left"></i> Volver al inicio
+            <i class="bi bi-house-door"></i> Ir al inicio
         </a>
     </div>
     <script src="${pageContext.request.contextPath}/js/transicion.js"></script>
