@@ -1,76 +1,56 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi perfil — Hogar 360</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/css/estilo.css" rel="stylesheet">
-</head>
-<body>
-
-<jsp:include page="/WEB-INF/jspf/navbar.jsp">
-    <jsp:param name="navTipo" value="volver" />
-    <jsp:param name="navDestino" value="cliente/panel" />
-    <jsp:param name="navTexto" value="Volver al panel" />
+<jsp:include page="/WEB-INF/jspf/app-inicio.jsp">
+    <jsp:param name="seccion" value="cliente" />
+    <jsp:param name="activo" value="perfil" />
+    <jsp:param name="titulo" value="Mi perfil" />
+    <jsp:param name="descripcion" value="Estos datos se comparten con la inmobiliaria cuando agendas una visita o radicas una solicitud." />
 </jsp:include>
 
-<div class="container py-5" style="max-width: 640px;">
-
-    <h2 class="mb-4">Mi perfil</h2>
-
     <c:if test="${not empty errorPerfil}">
-        <div class="alerta-error mb-3">${errorPerfil}</div>
-    </c:if>
-    <c:if test="${not empty mensajeExito}">
-        <div class="alerta-exito mb-3">${mensajeExito}</div>
+        <div class="alerta-error mb-3" style="max-width:720px;">${errorPerfil}</div>
     </c:if>
 
-    <div class="card shadow-sm p-4">
-        <form action="${pageContext.request.contextPath}/cliente/perfil" method="post" novalidate>
+    <div class="bloque" style="max-width:720px;">
+        <div class="bloque-cuerpo">
+            <form action="${pageContext.request.contextPath}/cliente/perfil" method="post" novalidate>
 
-            <div class="mb-3">
-                <label for="nombres" class="form-label">Nombres</label>
-                <input type="text" class="form-control" id="nombres" name="nombres" required
-                       value="${perfil.nombres}">
-            </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nombres" class="form-label">Nombres</label>
+                        <input type="text" class="form-control" id="nombres" name="nombres" required
+                               value="${perfil.nombres}">
+                    </div>
 
-            <div class="mb-3">
-                <label for="apellidos" class="form-label">Apellidos</label>
-                <input type="text" class="form-control" id="apellidos" name="apellidos" required
-                       value="${perfil.apellidos}">
-            </div>
+                    <div class="col-md-6">
+                        <label for="apellidos" class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" id="apellidos" name="apellidos" required
+                               value="${perfil.apellidos}">
+                    </div>
 
-            <div class="mb-3">
-                <label for="documento" class="form-label">Documento</label>
-                <input type="text" class="form-control" id="documento" name="documento" required
-                       value="${perfil.documento}">
-            </div>
+                    <div class="col-md-6">
+                        <label for="documento" class="form-label">Documento</label>
+                        <input type="text" class="form-control" id="documento" name="documento" required
+                               value="${perfil.documento}">
+                    </div>
 
-            <div class="mb-3">
-                <label for="telefono" class="form-label">Teléfono</label>
-                <input type="text" class="form-control" id="telefono" name="telefono"
-                       value="${perfil.telefono}">
-            </div>
+                    <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono"
+                               value="${perfil.telefono}">
+                    </div>
 
-            <div class="mb-4">
-                <label for="direccion" class="form-label">Dirección</label>
-                <input type="text" class="form-control" id="direccion" name="direccion"
-                       value="${perfil.direccion}">
-            </div>
+                    <div class="col-12">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion"
+                               value="${perfil.direccion}">
+                    </div>
+                </div>
 
-            <button type="submit" class="btn btn-coral w-100">Guardar cambios</button>
-        </form>
+                <button type="submit" class="btn btn-coral w-100 mt-4">Guardar cambios</button>
+            </form>
+        </div>
     </div>
 
-</div>
-
-<script src="${pageContext.request.contextPath}/js/transicion.js"></script>
-</body>
-</html>
+<jsp:include page="/WEB-INF/jspf/app-fin.jsp" />

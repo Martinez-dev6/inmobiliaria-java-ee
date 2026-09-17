@@ -19,6 +19,12 @@ public class Cita {
     private String apellidosCliente;
     private String telefonoCliente;
 
+    // Derivados de JOIN para la vista del cliente: quien publica la propiedad y
+    // como contactarlo. Sin esto la reserva no decia con quien era la visita.
+    private String nombreInmobiliaria;
+    private String telefonoInmobiliaria;
+    private String correoInmobiliaria;
+
     public Cita() {
     }
 
@@ -122,5 +128,29 @@ public class Cita {
 
     public void setTelefonoCliente(String telefonoCliente) {
         this.telefonoCliente = telefonoCliente;
+    }
+
+    public String getNombreInmobiliaria() {
+        return nombreInmobiliaria;
+    }
+
+    public void setNombreInmobiliaria(String nombreInmobiliaria) {
+        this.nombreInmobiliaria = nombreInmobiliaria;
+    }
+
+    public String getTelefonoInmobiliaria() {
+        return telefonoInmobiliaria;
+    }
+
+    public void setTelefonoInmobiliaria(String telefonoInmobiliaria) {
+        this.telefonoInmobiliaria = telefonoInmobiliaria;
+    }
+
+    public String getCorreoInmobiliaria() {
+        return correoInmobiliaria;
+    }
+
+    public void setCorreoInmobiliaria(String correoInmobiliaria) {
+        this.correoInmobiliaria = correoInmobiliaria;
     }
 }

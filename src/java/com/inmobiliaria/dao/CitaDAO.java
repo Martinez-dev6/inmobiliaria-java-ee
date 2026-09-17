@@ -38,12 +38,22 @@ public class CitaDAO {
         }
     }
 
+    /**
+     * Citas del cliente con los datos de contacto de quien publica la propiedad:
+     * al reservar una visita lo primero que necesita saber es con que agencia es
+     * y como escribirle si algo cambia.
+     */
     public List<Cita> listarPorCliente(int idCliente) throws SQLException {
 
         String sql = "SELECT c.id_cita, c.id_propiedad, c.id_cliente, c.fecha_hora, c.estado, " +
-                     "       c.respuesta_agente, c.fecha_respuesta, p.titulo AS titulo_propiedad " +
+                     "       c.respuesta_agente, c.fecha_respuesta, p.titulo AS titulo_propiedad, " +
+                     "       i.nombre_comercial AS nombre_inmobiliaria, " +
+                     "       i.telefono_contacto AS telefono_inmobiliaria, " +
+                     "       ui.correo AS correo_inmobiliaria " +
                      "FROM cita c " +
                      "JOIN propiedad p ON p.id_propiedad = c.id_propiedad " +
+                     "LEFT JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria " +
+                     "LEFT JOIN usuario ui ON ui.id_usuario = i.id_usuario " +
                      "WHERE c.id_cliente = ? " +
                      "ORDER BY c.fecha_hora DESC";
 
@@ -56,7 +66,7 @@ public class CitaDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    citas.add(mapearFila(rs, false));
+                    citas.add(mapearFila(rs, false, true));
                 }
             }
         }
@@ -87,12 +97,34 @@ public class CitaDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    citas.add(mapearFila(rs, true));
+                    citas.add(mapearFila(rs, true, false));
                 }
             }
         }
 
         return citas;
+    }
+
+    /**
+     * Solo el numero de citas por atender. Lo usa el filtro que pinta el aviso
+     * del menu lateral en todas las paginas de la inmobiliaria, asi que conviene
+     * que sea un conteo y no traer la lista entera.
+     */
+    public int contarPendientesPorInmobiliaria(int idInmobiliaria) throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM cita c " +
+                     "JOIN propiedad p ON p.id_propiedad = c.id_propiedad " +
+                     "WHERE p.id_inmobiliaria = ? AND c.estado = 'pendiente'";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idInmobiliaria);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
     }
 
     /**
@@ -139,7 +171,7 @@ public class CitaDAO {
         }
     }
 
-    private Cita mapearFila(ResultSet rs, boolean conCliente) throws SQLException {
+    private Cita mapearFila(ResultSet rs, boolean conCliente, boolean conInmobiliaria) throws SQLException {
         Cita c = new Cita();
         c.setIdCita(rs.getInt("id_cita"));
         c.setIdPropiedad(rs.getInt("id_propiedad"));
@@ -154,6 +186,11 @@ public class CitaDAO {
             c.setNombresCliente(rs.getString("nombres_cliente"));
             c.setApellidosCliente(rs.getString("apellidos_cliente"));
             c.setTelefonoCliente(rs.getString("telefono_cliente"));
+        }
+        if (conInmobiliaria) {
+            c.setNombreInmobiliaria(rs.getString("nombre_inmobiliaria"));
+            c.setTelefonoInmobiliaria(rs.getString("telefono_inmobiliaria"));
+            c.setCorreoInmobiliaria(rs.getString("correo_inmobiliaria"));
         }
         return c;
     }

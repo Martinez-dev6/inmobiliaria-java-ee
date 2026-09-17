@@ -3,6 +3,7 @@ package com.inmobiliaria.controlador;
 import com.inmobiliaria.dao.FavoritoDAO;
 import com.inmobiliaria.dao.PropiedadDAO;
 import com.inmobiliaria.modelo.Propiedad;
+import com.inmobiliaria.util.Flash;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -49,11 +50,14 @@ public class FavoritoController extends HttpServlet {
         try {
             if ("marcar".equals(accion)) {
                 favoritoDAO.marcar(idUsuario, idPropiedad);
+                Flash.exito(request, "Propiedad añadida a tus favoritos.");
             } else if ("desmarcar".equals(accion)) {
                 favoritoDAO.desmarcar(idUsuario, idPropiedad);
+                Flash.exito(request, "Propiedad quitada de tus favoritos.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            Flash.error(request, "No se pudieron actualizar tus favoritos.");
         }
 
         response.sendRedirect(request.getContextPath() + "/propiedad?id=" + idPropiedad);

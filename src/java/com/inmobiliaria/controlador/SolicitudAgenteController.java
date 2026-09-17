@@ -6,6 +6,7 @@ import com.inmobiliaria.dao.SolicitudDAO;
 import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.modelo.DocumentoSolicitud;
 import com.inmobiliaria.modelo.Solicitud;
+import com.inmobiliaria.util.Flash;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,9 +31,10 @@ public class SolicitudAgenteController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        mostrar(request, response, null);
+        mostrar(request, response);
     }
 
+    /** POST-Redirect-GET para que recargar no vuelva a resolver la solicitud. */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -41,29 +43,39 @@ public class SolicitudAgenteController extends HttpServlet {
         int idSolicitud = Integer.parseInt(request.getParameter("idSolicitud"));
         String accion = request.getParameter("accion");
         String respuesta = request.getParameter("respuesta");
-        String nuevoEstado = "aprobar".equals(accion) ? "aprobada" : "rechazada";
+
+        boolean aprobar = "aprobar".equals(accion);
+        String nuevoEstado = aprobar ? "aprobada" : "rechazada";
 
         try {
-            if (idInmobiliaria != null) {
+            if (idInmobiliaria == null) {
+                Flash.error(request, "Primero registra tu inmobiliaria en «Datos de la agencia».");
+            } else {
                 solicitudDAO.cambiarEstado(idSolicitud, idInmobiliaria, nuevoEstado, respuesta);
 
                 HttpSession sesion = request.getSession(false);
                 int idUsuario = (int) sesion.getAttribute("idUsuario");
                 usuarioDAO.registrarAuditoria(idUsuario,
-                        "aprobar".equals(accion) ? "aprobar_solicitud" : "rechazar_solicitud",
-                        "Solicitud id " + idSolicitud + " → " + nuevoEstado);
+                        aprobar ? "aprobar_solicitud" : "rechazar_solicitud",
+                        "Solicitud id " + idSolicitud + " -> " + nuevoEstado);
+
+                Flash.exito(request, aprobar
+                        ? "Solicitud aprobada. El cliente verá tu respuesta en su panel."
+                        : "Solicitud rechazada. El cliente verá tu respuesta en su panel.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            Flash.error(request, "No se pudo actualizar la solicitud. Intenta más tarde.");
         }
 
-        mostrar(request, response, null);
+        response.sendRedirect(request.getContextPath() + "/agente/solicitudes");
     }
 
-    private void mostrar(HttpServletRequest request, HttpServletResponse response, String error)
+    private void mostrar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         Integer idInmobiliaria = resolverIdInmobiliaria(request);
+        request.setAttribute("sinInmobiliaria", idInmobiliaria == null);
 
         try {
             if (idInmobiliaria != null) {
@@ -79,11 +91,7 @@ public class SolicitudAgenteController extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            error = "No se pudieron cargar las solicitudes.";
-        }
-
-        if (error != null) {
-            request.setAttribute("errorSolicitudes", error);
+            request.setAttribute("errorSolicitudes", "No se pudieron cargar las solicitudes.");
         }
 
         request.getRequestDispatcher("/agente/solicitudes.jsp").forward(request, response);

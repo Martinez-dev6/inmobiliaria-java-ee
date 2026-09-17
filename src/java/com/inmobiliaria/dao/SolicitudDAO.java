@@ -91,6 +91,27 @@ public class SolicitudDAO {
     }
 
     /**
+     * Solo el numero de solicitudes por atender, para el aviso del menu lateral
+     * de la inmobiliaria (ver ContadoresAgenteFilter).
+     */
+    public int contarPendientesPorInmobiliaria(int idInmobiliaria) throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM solicitud s " +
+                     "JOIN propiedad p ON p.id_propiedad = s.id_propiedad " +
+                     "WHERE p.id_inmobiliaria = ? AND s.estado = 'pendiente'";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idInmobiliaria);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    /**
      * Cambia el estado de una solicitud (y registra el mensaje del agente para
      * el cliente), verificando que la propiedad relacionada pertenezca a la
      * inmobiliaria que hace la peticion (proteccion IDOR).

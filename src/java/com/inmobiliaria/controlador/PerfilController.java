@@ -2,6 +2,7 @@ package com.inmobiliaria.controlador;
 
 import com.inmobiliaria.dao.PerfilDAO;
 import com.inmobiliaria.modelo.Perfil;
+import com.inmobiliaria.util.Flash;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -78,8 +79,9 @@ public class PerfilController extends HttpServlet {
             return;
         }
 
-        request.setAttribute("mensajeExito", "Perfil actualizado correctamente.");
-        mostrarFormulario(request, response, perfilEscrito);
+        // POST-Redirect-GET: el mensaje viaja en sesión y se recarga el perfil ya guardado.
+        Flash.exito(request, "Perfil actualizado correctamente.");
+        response.sendRedirect(request.getContextPath() + "/cliente/perfil");
     }
 
     private String validar(String nombres, String apellidos, String documento, String telefono) {

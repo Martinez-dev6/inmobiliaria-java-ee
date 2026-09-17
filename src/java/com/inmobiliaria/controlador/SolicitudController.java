@@ -4,6 +4,7 @@ import com.inmobiliaria.dao.DocumentoSolicitudDAO;
 import com.inmobiliaria.dao.SolicitudDAO;
 import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.modelo.Solicitud;
+import com.inmobiliaria.util.Flash;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -33,9 +34,10 @@ public class SolicitudController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        mostrar(request, response, null, null);
+        mostrar(request, response);
     }
 
+    /** POST-Redirect-GET: radicar deja un mensaje flash y redirige al listado. */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -48,7 +50,8 @@ public class SolicitudController extends HttpServlet {
         String observaciones = request.getParameter("observaciones");
 
         if (tipoSolicitud == null || (!tipoSolicitud.equals("compra") && !tipoSolicitud.equals("arriendo"))) {
-            mostrar(request, response, "Selecciona un tipo de solicitud válido (compra o arriendo).", null);
+            Flash.error(request, "Selecciona un tipo de solicitud válido (compra o arriendo).");
+            response.sendRedirect(request.getContextPath() + "/cliente/solicitudes");
             return;
         }
 
@@ -60,11 +63,13 @@ public class SolicitudController extends HttpServlet {
             usuarioDAO.registrarAuditoria(idCliente, "radicar_solicitud",
                     "Radicó una solicitud de " + tipoSolicitud + " (id " + idGenerado
                             + ") para la propiedad id " + idPropiedad);
-            mostrar(request, response, null, "Solicitud radicada correctamente.");
+            Flash.exito(request, "Solicitud radicada correctamente. La inmobiliaria la revisará pronto.");
         } catch (SQLException e) {
             e.printStackTrace();
-            mostrar(request, response, "No se pudo radicar la solicitud. Intenta más tarde.", null);
+            Flash.error(request, "No se pudo radicar la solicitud. Intenta más tarde.");
         }
+
+        response.sendRedirect(request.getContextPath() + "/cliente/solicitudes");
     }
 
     private void guardarDocumentos(HttpServletRequest request, int idSolicitud)
@@ -98,8 +103,7 @@ public class SolicitudController extends HttpServlet {
         }
     }
 
-    private void mostrar(HttpServletRequest request, HttpServletResponse response,
-                          String error, String mensaje)
+    private void mostrar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession sesion = request.getSession(false);
@@ -109,14 +113,7 @@ public class SolicitudController extends HttpServlet {
             request.setAttribute("solicitudes", solicitudDAO.listarPorCliente(idCliente));
         } catch (SQLException e) {
             e.printStackTrace();
-            error = "No se pudieron cargar tus solicitudes.";
-        }
-
-        if (error != null) {
-            request.setAttribute("errorSolicitudes", error);
-        }
-        if (mensaje != null) {
-            request.setAttribute("mensajeSolicitudes", mensaje);
+            request.setAttribute("errorSolicitudes", "No se pudieron cargar tus solicitudes.");
         }
 
         request.getRequestDispatcher("/cliente/solicitudes.jsp").forward(request, response);

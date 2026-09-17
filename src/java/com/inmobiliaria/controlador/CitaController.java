@@ -4,6 +4,7 @@ import com.inmobiliaria.dao.CitaDAO;
 import com.inmobiliaria.dao.UsuarioDAO;
 import com.inmobiliaria.excepcion.HorarioOcupadoException;
 import com.inmobiliaria.modelo.Cita;
+import com.inmobiliaria.util.Flash;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -24,17 +25,27 @@ public class CitaController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        mostrar(request, response, null, null);
+        mostrar(request, response);
     }
 
+    /**
+     * POST-Redirect-GET: agendar o cancelar deja un mensaje flash y redirige al
+     * listado, de modo que recargar la página no vuelva a enviar el formulario.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         if ("cancelar".equals(request.getParameter("accion"))) {
-            procesarCancelar(request, response);
-            return;
+            procesarCancelar(request);
+        } else {
+            procesarAgendar(request);
         }
+
+        response.sendRedirect(request.getContextPath() + "/cliente/citas");
+    }
+
+    private void procesarAgendar(HttpServletRequest request) {
 
         HttpSession sesion = request.getSession(false);
         int idCliente = (int) sesion.getAttribute("idUsuario");
@@ -44,7 +55,13 @@ public class CitaController extends HttpServlet {
 
         Timestamp fechaHora = parsearFechaHora(fechaTexto);
         if (fechaHora == null) {
-            mostrar(request, response, "La fecha y hora no son válidas.", null);
+            Flash.error(request, "La fecha y hora no son válidas.");
+            return;
+        }
+        // El navegador acepta fechas pasadas en datetime-local, así que la regla
+        // se valida también aquí, que es donde de verdad cuenta.
+        if (fechaHora.before(new Timestamp(System.currentTimeMillis()))) {
+            Flash.error(request, "No puedes agendar una visita en una fecha que ya pasó.");
             return;
         }
 
@@ -54,17 +71,17 @@ public class CitaController extends HttpServlet {
             int idGenerado = citaDAO.crear(cita);
             usuarioDAO.registrarAuditoria(idCliente, "agendar_cita",
                     "Agendó la cita id " + idGenerado + " para la propiedad id " + idPropiedad);
-            mostrar(request, response, null, "Cita agendada correctamente.");
+            Flash.exito(request, "Cita agendada correctamente. La inmobiliaria debe confirmarla; "
+                    + "abajo tienes sus datos de contacto.");
         } catch (HorarioOcupadoException e) {
-            mostrar(request, response, e.getMessage(), null);
+            Flash.error(request, e.getMessage());
         } catch (SQLException e) {
             e.printStackTrace();
-            mostrar(request, response, "No se pudo agendar la cita. Intenta más tarde.", null);
+            Flash.error(request, "No se pudo agendar la cita. Intenta más tarde.");
         }
     }
 
-    private void procesarCancelar(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    private void procesarCancelar(HttpServletRequest request) {
 
         HttpSession sesion = request.getSession(false);
         int idCliente = (int) sesion.getAttribute("idUsuario");
@@ -73,17 +90,15 @@ public class CitaController extends HttpServlet {
         try {
             int filas = citaDAO.cancelarPorCliente(idCita, idCliente);
             if (filas == 0) {
-                mostrar(request, response, "Esa cita no se puede cancelar (ya pasó o no es tuya).", null);
+                Flash.error(request, "Esa cita no se puede cancelar (ya pasó o no es tuya).");
                 return;
             }
             usuarioDAO.registrarAuditoria(idCliente, "cancelar_cita_cliente", "Canceló su cita id " + idCita);
+            Flash.exito(request, "Cita cancelada.");
         } catch (SQLException e) {
             e.printStackTrace();
-            mostrar(request, response, "No se pudo cancelar la cita. Intenta más tarde.", null);
-            return;
+            Flash.error(request, "No se pudo cancelar la cita. Intenta más tarde.");
         }
-
-        mostrar(request, response, null, "Cita cancelada.");
     }
 
     private Timestamp parsearFechaHora(String texto) {
@@ -99,8 +114,7 @@ public class CitaController extends HttpServlet {
         }
     }
 
-    private void mostrar(HttpServletRequest request, HttpServletResponse response,
-                          String error, String mensaje)
+    private void mostrar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession sesion = request.getSession(false);
@@ -110,14 +124,7 @@ public class CitaController extends HttpServlet {
             request.setAttribute("citas", citaDAO.listarPorCliente(idCliente));
         } catch (SQLException e) {
             e.printStackTrace();
-            error = "No se pudieron cargar tus citas.";
-        }
-
-        if (error != null) {
-            request.setAttribute("errorCitas", error);
-        }
-        if (mensaje != null) {
-            request.setAttribute("mensajeCitas", mensaje);
+            request.setAttribute("errorCitas", "No se pudieron cargar tus citas.");
         }
 
         request.getRequestDispatcher("/cliente/citas.jsp").forward(request, response);
