@@ -7,40 +7,39 @@
 
 ---
 
-## Sprint Goal
+## Meta del sprint
 
-Tener la base de datos diseñada y creada, la conexión JDBC centralizada
-funcionando, y un flujo completo de landing page → registro → login →
-redirección por rol, con control de acceso validado en servidor.
+Dejar la base de datos diseñada y creada, la conexión JDBC centralizada funcionando, y todo el flujo de landing page → registro → login → redirección por rol, con el control de acceso validado del lado del servidor (no solo ocultando botones en la vista).
 
 ---
 
-## Historias de usuario abordadas
+## Historias que abordamos
 
-| # | Historia | Prioridad (backlog) | Estimación |
+| # | Historia | Prioridad | Estimación |
 |---|---|---|---|
 | 1 | Como visitante, quiero una página de aterrizaje atractiva para conocer la inmobiliaria y buscar propiedades rápidamente. | Alta | 1 día |
-| 2 | Como usuario, quiero registrarme con un correo único y validado para crear mi cuenta sin duplicados en el sistema. | Alta | 0.5 día |
-| 3 | Como usuario registrado, quiero iniciar y cerrar sesión de forma segura para que el sistema me lleve al panel que corresponde a mi rol. | Alta | 0.5 día |
+| 2 | Como usuario, quiero registrarme con un correo único y validado para crear mi cuenta sin duplicados. | Alta | 0.5 día |
+| 3 | Como usuario registrado, quiero iniciar y cerrar sesión de forma segura para que el sistema me lleve al panel de mi rol. | Alta | 0.5 día |
 | 4 | Como administrador, quiero asignar y revocar roles a los usuarios para controlar los permisos de la aplicación. | Alta | 1 día |
 
-**Nota:** la Historia 5 (perfil de usuario 1:1) se deja explícitamente para
-Sprint 2, según la distribución sugerida por el docente.
+La Historia 5 (perfil de usuario, la relación 1:1) la dejamos a propósito para Sprint 2 — así lo sugiere la distribución del docente y no tenía sentido adelantarla sin tener aún login funcionando.
 
 ---
 
-## Tareas técnicas (prerrequisito obligatorio antes de programar)
+## Antes de programar: el modelo de datos
+
+El PDF es claro en esto — primero se diseña y sustenta el modelo, después se escribe código. Así que antes de tocar un solo controlador:
 
 | Tarea | Estimación |
 |---|---|
 | Diseño del MER | 1 día |
 | Modelo relacional en 3FN + diccionario de datos | 1 día |
-| Script DDL + script DML (≥10 registros/tabla principal) | 1 día |
+| Script DDL + script DML (mínimo 10 registros por tabla principal) | 1 día |
 | Conexión JDBC centralizada y configurable | 1 día |
 
 ---
 
-## Cronograma (7 días)
+## Cómo repartimos los 7 días
 
 | Día | Actividad |
 |---|---|
@@ -49,39 +48,29 @@ Sprint 2, según la distribución sugerida por el docente.
 | 4 | Conexión JDBC centralizada |
 | 5 | Historia 1 — Landing page |
 | 6 | Historias 2 y 3 — Registro + Login/logout |
-| 7 | Historia 4 — Roles + Filter de control de acceso + Sprint Review |
+| 7 | Historia 4 — Roles + Filter de acceso + Sprint Review |
 
 ---
 
-## Criterios de aceptación (Definition of Done)
+## Cuándo damos por hecha cada historia
 
 **H1 — Landing page**
-- [ ] Responsiva (Bootstrap / media queries)
-- [ ] Muestra propiedades destacadas
-- [ ] Buscador rápido visible
-- [ ] Accesos a registro/login visibles para visitante no autenticado
+Responsiva, con propiedades destacadas y buscador rápido visibles, y accesos a registro/login para quien no ha iniciado sesión.
 
 **H2 — Registro**
-- [ ] Valida formato de correo
-- [ ] Rechaza correos duplicados con mensaje claro (no stacktrace de Java)
-- [ ] Contraseña almacenada con hash (BCrypt/PBKDF2/SHA-256+salt), nunca texto plano
+Valida el formato del correo, rechaza duplicados con un mensaje claro (nada de stacktrace de Java en pantalla), y la contraseña se guarda con hash — BCrypt, PBKDF2 o SHA-256 con salt, nunca texto plano.
 
 **H3 — Login/logout**
-- [ ] Valida credenciales contra la base de datos
-- [ ] Crea HttpSession con id_usuario y rol(es)
-- [ ] Redirige al dashboard correspondiente según rol
-- [ ] Logout invalida correctamente la sesión
+Valida contra la base de datos, crea la `HttpSession` con el id del usuario y su(s) rol(es), redirige al panel que corresponde, y el logout invalida la sesión de verdad (no solo redirige).
 
-**H4 — Gestión de roles + control de acceso**
-- [ ] Admin puede asignar/revocar roles desde su panel
-- [ ] Filter de servlet bloquea rutas privadas a usuarios no autenticados o sin el rol requerido
-- [ ] Redirección a página de acceso denegado al intentar entrar por URL directa
+**H4 — Roles y control de acceso**
+El admin puede asignar y revocar roles desde su panel. Un filtro de servlet bloquea las rutas privadas si alguien entra sin sesión o con el rol equivocado, mandándolo a una página de acceso denegado — probando escribir la URL a mano, no solo navegando por los menús.
 
 ---
 
-## Fuera de alcance en este sprint (explícitamente pospuesto)
+## Lo que dejamos para después, a propósito
 
 - Perfil de usuario (1:1) → Sprint 2
 - CRUD de propiedades, imágenes, características → Sprint 2
 - Citas, solicitudes, documentos, favoritos, reportes → Sprint 3
-- Chat de contacto, notificaciones por correo → Backlog extra (Sprint 3 o descartable si falta tiempo)
+- Chat de contacto, notificaciones por correo → si sobra tiempo, si no, se descarta

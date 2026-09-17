@@ -1,25 +1,22 @@
 # Sprint 3 — Retrospective
 **Fecha de cierre:** 10/09/2026
 
-## ¿Qué salió bien?
-- Los patrones ya establecidos en Sprints 1-2 (transacción manual, checked exceptions para UNIQUE, protección IDOR, subida real de archivos) se reutilizaron sin fricción en 6 historias nuevas de una sola vez — la arquitectura ya construida escaló bien a un lote grande de trabajo.
-- La protección IDOR se resolvió incluso en tablas sin columna de "dueño" directa (`cita`, `solicitud`), usando una subconsulta contra `propiedad` en vez de desnormalizar el modelo agregando una columna redundante.
-- Verificar el DDL/DML reales antes de escribir código (mismo hábito de sprints anteriores) confirmó que Sprint 3 no necesitaba ningún cambio de esquema — las 5 tablas ya existían completas desde la Fase 1.
+## Qué salió bien
 
-## ¿Qué no salió bien / problemas encontrados?
+Los patrones que ya veníamos usando desde Sprints 1 y 2 —transacción manual, excepciones *checked* para los UNIQUE, protección IDOR, subida real de archivos— se reutilizaron sin fricción en las 6 historias de este sprint, aunque las metimos casi todas de una sola vez. La arquitectura que ya teníamos construida aguantó bien un lote grande de trabajo. La protección IDOR la resolvimos incluso en tablas que no tienen una columna de "dueño" directa (`cita`, `solicitud`) usando una subconsulta contra `propiedad`, en vez de desnormalizar el modelo agregando una columna redundante. Y revisar el DDL/DML reales antes de escribir código —la misma costumbre de los sprints anteriores— nos confirmó que este sprint no necesitaba ningún cambio de esquema: las 5 tablas ya existían completas desde la Fase 1.
 
-| Problema | Causa | Solución aplicada |
+## Qué no salió tan bien
+
+| Problema | Por qué pasó | Cómo lo arreglamos |
 |---|---|---|
-| Los 3 tests fallaban con `ClassNotFoundException` de un nombre de clase con un `java.` inventado al principio | La Test Package Folder de NetBeans estaba registrada como `test`, pero los archivos venían en `test/java/com/...` (espejo de la estructura de `src/java/...`) — NetBeans arma el paquete contando carpetas desde la raíz registrada, no desde el `package` del archivo | Mover los archivos a `test/com/...`, sin la carpeta `java` intermedia |
-| `NoClassDefFoundError: org/hamcrest/SelfDescribing` al correr los tests | JUnit 4 depende de Hamcrest en tiempo de ejecución; el asistente de NetBeans no siempre la agrega junto con JUnit | Agregar la librería "Hamcrest" por separado desde el mismo asistente |
-| Carpeta de pruebas quedó duplicada en la configuración del proyecto | Doble clic accidental en "Add Folder" | Eliminar la fila repetida en Project Properties → Sources |
+| Los 3 tests fallaban con un `ClassNotFoundException` de un nombre de clase raro, con un `java.` metido al principio | La Test Package Folder de NetBeans estaba registrada como `test`, pero los archivos venían en `test/java/com/...` — NetBeans arma el nombre del paquete contando carpetas desde la raíz registrada, no desde el `package` que dice el archivo | Movimos los archivos a `test/com/...`, sin la carpeta `java` de más |
+| `NoClassDefFoundError: org/hamcrest/SelfDescribing` al correr los tests | JUnit 4 depende de Hamcrest en tiempo de ejecución, y el asistente de NetBeans no siempre la agrega junto con JUnit | Agregamos la librería Hamcrest aparte, desde el mismo asistente |
+| La carpeta de pruebas quedó duplicada en la configuración del proyecto | Doble clic sin querer en "Add Folder" | Eliminamos la fila repetida en Project Properties → Sources |
 
-## ¿Qué mejorar para futuros proyectos?
-- Al usar un asistente de configuración de IDE (agregar librerías, carpetas de test), verificar el resultado final antes de asumir que quedó bien — dos de los tres problemas de este sprint fueron de configuración del entorno, no de código.
-- Cuando se entregue código en lote (como el `.zip` de las Historias 9-13), ser explícito sobre la ruta EXACTA que el IDE tiene configurada, en vez de asumir una estructura de carpetas "espejo" del código fuente — ahí nació el problema de `test/java/...` vs `test/...`.
-- "Compila sin errores" y "corre sin errores" son dos confirmaciones distintas — vale la pena pedir siempre la segunda antes de dar algo por completado, como pasó aquí con las pruebas unitarias.
+## Qué nos llevamos para más adelante
 
-## Preparación para la sustentación (en vez de "compromisos para el siguiente sprint" — este era el último)
-- Repasar, con el registro maestro como guía, el porqué de cada relación 1:1, 1:N y N:M del modelo — el profesor puede preguntar por cualquiera de las tres.
-- Practicar explicar la protección IDOR con un ejemplo concreto (por qué un agente no puede editar la propiedad de otro, ni aprobar la solicitud de otro).
-- Tener claro qué se decidió reforzar más allá del mínimo del backlog (imágenes reales en vez de URLs, checkbox de destacada) y por qué — son buenas respuestas para "¿qué le agregarías si tuvieras más tiempo?" porque ya están hechas.
+Cuando se usa un asistente de configuración del IDE (agregar librerías, carpetas de test), conviene revisar el resultado final antes de asumir que quedó bien — dos de los tres problemas de este sprint fueron de configuración, no de código. Cuando se entrega código en lote, como pasó con el `.zip` de las Historias 9 a 13, hay que ser explícito sobre la ruta exacta que tiene configurada el IDE, en vez de asumir una estructura "espejo" del código fuente — ahí nació justo el problema de `test/java/...` contra `test/...`. Y "compila sin errores" no es lo mismo que "corre sin errores" — vale la pena pedir siempre la segunda confirmación antes de dar algo por terminado, como nos pasó con las pruebas unitarias.
+
+## Antes de la sustentación (en vez de compromisos para el siguiente sprint — este era el último)
+
+Repasar, con el registro maestro como guía, el porqué de cada relación 1:1, 1:N y N:M del modelo — el profesor puede preguntar por cualquiera de las tres. Practicar cómo explicar la protección IDOR con un ejemplo concreto: por qué un agente no puede editar la propiedad de otro, ni aprobar la solicitud de otro. Y tener claro qué se decidió reforzar más allá del mínimo del backlog —imágenes reales en vez de URLs, el checkbox de destacada— porque son buenas respuestas para "¿qué le agregarías si tuvieras más tiempo?", ya que eso ya está hecho.

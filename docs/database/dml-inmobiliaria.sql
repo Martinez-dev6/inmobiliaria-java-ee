@@ -113,19 +113,19 @@ INSERT INTO propiedad (id_inmobiliaria, id_ciudad, id_tipo_propiedad, matricula_
 
 -- Imágenes por propiedad (1:N — al menos 2 por propiedad, ejemplo con las primeras)
 INSERT INTO imagen_propiedad (id_propiedad, url_imagen, orden) VALUES
-(1, '/img/propiedades/mat0001_1.jpg', 1),
-(1, '/img/propiedades/mat0001_2.jpg', 2),
-(2, '/img/propiedades/mat0002_1.jpg', 1),
-(3, '/img/propiedades/mat0003_1.jpg', 1),
-(4, '/img/propiedades/mat0004_1.jpg', 1),
-(5, '/img/propiedades/mat0005_1.jpg', 1),
-(6, '/img/propiedades/mat0006_1.jpg', 1),
-(7, '/img/propiedades/mat0007_1.jpg', 1),
-(8, '/img/propiedades/mat0008_1.jpg', 1),
-(9, '/img/propiedades/mat0009_1.jpg', 1),
-(10, '/img/propiedades/mat0010_1.jpg', 1),
-(11, '/img/propiedades/mat0011_1.jpg', 1),
-(12, '/img/propiedades/mat0012_1.jpg', 1);
+(1, 'img/propiedades/mat0001_1.jpg', 1),
+(1, 'img/propiedades/mat0001_2.jpg', 2),
+(2, 'img/propiedades/mat0002_1.jpg', 1),
+(3, 'img/propiedades/mat0003_1.jpg', 1),
+(4, 'img/propiedades/mat0004_1.jpg', 1),
+(5, 'img/propiedades/mat0005_1.jpg', 1),
+(6, 'img/propiedades/mat0006_1.jpg', 1),
+(7, 'img/propiedades/mat0007_1.jpg', 1),
+(8, 'img/propiedades/mat0008_1.jpg', 1),
+(9, 'img/propiedades/mat0009_1.jpg', 1),
+(10, 'img/propiedades/mat0010_1.jpg', 1),
+(11, 'img/propiedades/mat0011_1.jpg', 1),
+(12, 'img/propiedades/mat0012_1.jpg', 1);
 
 -- Características por propiedad (N:M — combinaciones variadas)
 INSERT INTO propiedad_caracteristica (id_propiedad, id_caracteristica) VALUES
@@ -194,7 +194,8 @@ INSERT INTO favorito (id_usuario, id_propiedad, fecha_marcado) VALUES
 (5, 1, '2026-01-24 08:00:00'),
 (6, 3, '2026-01-25 09:00:00'),
 (7, 10, '2026-01-26 10:00:00'),
-(8, 2, '2026-01-27 11:00:00');
+(8, 2, '2026-01-27 11:00:00'),
+(2, 4, '2026-01-28 12:00:00');
 
 -- Auditoría: 12 registros (eventos simulados)
 INSERT INTO auditoria (id_usuario, accion, descripcion, fecha_evento) VALUES

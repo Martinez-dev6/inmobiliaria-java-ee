@@ -1,28 +1,29 @@
 # Sprint 1 — Review
 **Fecha de cierre:** 07/09/2026
 
-## Historias completadas (4 de 4 planificadas)
+Cerramos las 4 historias planificadas, ninguna se quedó a medias.
 
-| Historia | Descripción | Estado | Evidencia |
-|---|---|---|---|
-| H1 | Landing page responsiva | ✅ Completa | `web/index.jsp`, commit `9b213ed` |
-| H2 | Registro con correo único y contraseña cifrada | ✅ Completa | `RegistroController`, hash BCrypt verificado en BD |
-| H3 | Login/logout con sesión por rol | ✅ Completa | `LoginController`/`LogoutController`, 5 casos probados |
-| H4 | Admin asigna/revoca roles | ✅ Completa | `GestionRolesController`, con registro en tabla `auditoria` |
+| Historia | Qué era | Evidencia |
+|---|---|---|
+| H1 | Landing page responsiva | `web/index.jsp`, commit `9b213ed` |
+| H2 | Registro con correo único y contraseña cifrada | `RegistroController`, hash BCrypt verificado directo en la BD |
+| H3 | Login/logout con sesión por rol | `LoginController` / `LogoutController`, probado con 5 casos distintos |
+| H4 | Admin asigna/revoca roles | `GestionRolesController`, queda registrado en `auditoria` |
 
-## Demostración funcional realizada
-- Registro de un usuario nuevo → hash BCrypt verificado en pgAdmin (`$2a$...`), rol `Cliente` asignado automáticamente.
-- Intento de registrar el mismo correo dos veces → mensaje "El correo ya se encuentra registrado" (sin excepción de Java expuesta al usuario).
-- Login con usuario de cada rol (Cliente, Inmobiliaria, Administrador) → redirección automática al panel correspondiente.
-- Login con cuenta inactiva (`activo = false`) → acceso rechazado.
-- Cierre de sesión → verificado con `session.invalidate()`, confirmado que la sesión queda vacía al reintentar acceder por URL directa.
-- Intento de acceso a `/admin/panel.jsp` sin sesión, y con sesión de rol incorrecto → ambos rechazados por `AccesoFilter`, redirigidos a `acceso-denegado.jsp`.
-- Panel de administrador: asignación y revocación de roles en vivo, con bloqueo al intentar dejar a un usuario sin ningún rol.
+## Cómo lo probamos
 
-## Funcionalidad adicional agregada (no exigida explícitamente, pero derivada de las historias)
-- Tabla `usuario_rol` con normalización de correo a minúsculas antes de guardar/consultar (evita duplicados por diferencia de mayúsculas).
-- Registro automático en tabla `auditoria` de cada cambio de rol realizado por el administrador.
-- Vista de acceso (login/registro) con diseño de tarjeta única animada, responsiva a celular.
+Registramos un usuario nuevo y confirmamos en pgAdmin que la contraseña quedó como hash BCrypt (`$2a$...`), con el rol Cliente asignado automáticamente. Intentamos registrar el mismo correo dos veces y salió el mensaje "El correo ya se encuentra registrado" — sin excepción de Java expuesta.
 
-## Desviaciones respecto al Planning
-Ninguna en alcance — las 4 historias planificadas se completaron. El tiempo de UI/CSS de la vista de acceso fue mayor al estimado inicialmente (ver Retrospective).
+Entramos con un usuario de cada rol (Cliente, Inmobiliaria, Administrador) y cada uno cayó en su panel correspondiente. Con una cuenta marcada como `activo = false` el acceso se rechazó. Cerramos sesión y confirmamos con `session.invalidate()` que, al volver a intentar entrar por URL directa, ya no había sesión.
+
+También probamos entrar a `/admin/panel.jsp` sin sesión y con sesión de otro rol — en ambos casos `AccesoFilter` nos mandó a `acceso-denegado.jsp`. Y en el panel del admin, asignamos y revocamos roles en vivo; el sistema bloquea que un usuario se quede sin ningún rol.
+
+## Cosas que agregamos sin que nos las pidieran
+
+- Normalizar el correo a minúsculas antes de guardar o comparar, para que "Usuario@Mail.com" y "usuario@mail.com" no cuenten como distintos.
+- Cada cambio de rol que hace el admin queda registrado en `auditoria`.
+- La vista de login/registro terminó con una animación de tarjeta única, responsiva a celular — más trabajo de UI del que estimamos, pero no cambió el alcance.
+
+## ¿Nos desviamos del Planning?
+
+En alcance no, las 4 historias salieron completas. Lo que sí tomó más tiempo del estimado fue el CSS de la vista de acceso (ver Retrospective).

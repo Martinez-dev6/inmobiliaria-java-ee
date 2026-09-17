@@ -1,26 +1,20 @@
 # Sprint 1 — Retrospective
 **Fecha de cierre:** 07/09/2026
 
-## ¿Qué salió bien?
-- La arquitectura en capas (modelo / DAO / controlador / vista) se mantuvo consistente en las 4 historias, facilitando agregar la Historia 4 reutilizando el mismo `UsuarioDAO`.
-- El uso de transacciones manuales (`setAutoCommit(false)`) en el registro protegió la integridad de datos: se comprobó en la práctica que, ante un error a mitad de proceso, no quedaron registros huérfanos.
-- Los commits frecuentes con mensajes descriptivos permitieron aislar y revertir errores con facilidad.
+## Qué salió bien
 
-## ¿Qué no salió bien / problemas encontrados?
+Mantener la arquitectura en capas (modelo / DAO / controlador / vista) desde el principio nos ahorró tiempo en la Historia 4, porque reutilizamos el mismo `UsuarioDAO` que ya teníamos de registro y login. Las transacciones manuales (`setAutoCommit(false)`) en el registro también valieron la pena: probamos a propósito provocar un error a mitad del proceso y no quedó ningún registro huérfano. Y comitear seguido, con mensajes que dijeran qué se hizo, nos salvó un par de veces cuando tocó revertir algo.
 
-| Problema | Causa | Solución aplicada |
+## Qué no salió tan bien
+
+| Problema | Por qué pasó | Cómo lo arreglamos |
 |---|---|---|
-| `git add "Web Pages/..."` fallaba | Confusión entre el nombre visual del nodo en NetBeans ("Web Pages") y la carpeta real en disco (`web/`) | Verificar siempre rutas reales con `git status` antes de un `add` |
-| Archivos `git` y `master` aparecieron sueltos en la raíz | Redirección accidental de la terminal (`>`) al pegar un comando con el prompt incluido | Escribir comandos directamente en la terminal, no pegar bloques completos |
-| Registro fallaba con "No se pudo completar el registro" | El DAO buscaba el rol `'cliente'` en minúscula, pero el DML lo sembró como `'Cliente'` (comparación sensible a mayúsculas en PostgreSQL) | Ajustar la constante al valor exacto del catálogo; se evaluó alternativa con `LOWER()` para mayor robustez futura |
-| Paneles del login/registro se veían superpuestos | Al adaptar un diseño de referencia, se dejó el desplazamiento visual sin ocultar la cara inactiva (`opacity`) | Agregar `opacity`/`pointer-events` a cada estado del panel |
-| Botón "Cerrar sesión" daba 404 dentro de `/admin/` | Ruta relativa (`href="logout"`) se resolvía distinto según la carpeta del JSP que la contenía | Usar siempre `${pageContext.request.contextPath}/...` para rutas absolutas dentro de la app |
+| `git add "Web Pages/..."` no funcionaba | Confundimos el nombre que muestra NetBeans ("Web Pages") con la carpeta real en disco (`web/`) | Desde entonces, siempre revisamos `git status` antes de un `add` |
+| Aparecieron archivos sueltos llamados `git` y `master` en la raíz | Pegamos un comando que traía el prompt de la terminal incluido, y eso redirigió (`>`) hacia un archivo | Escribir el comando directo en la terminal, no pegar bloques completos |
+| El registro fallaba con "No se pudo completar el registro" | El DAO buscaba el rol como `'cliente'` en minúscula, pero el DML lo sembró como `'Cliente'` — y PostgreSQL sí distingue mayúsculas en VARCHAR | Corregimos la constante al valor exacto del catálogo |
+| Los paneles de login/registro se veían montados uno sobre el otro | Al adaptar un diseño de referencia nos faltó ocultar la cara inactiva del panel | Agregamos `opacity` / `pointer-events` según el estado |
+| El botón "Cerrar sesión" daba 404 dentro de `/admin/` | La ruta relativa (`href="logout"`) se resolvía distinto según en qué carpeta estuviera el JSP | Usar siempre `${pageContext.request.contextPath}/...` para rutas absolutas |
 
-## ¿Qué mejorar para el próximo sprint?
-- Revisar archivos de referencia (CSS, layouts existentes) **antes** de escribir código nuevo que dependa de ellos, en vez de asumir su contenido.
-- Usar siempre `e.printStackTrace()` (o un logger) en los `catch` que conviertan errores técnicos en mensajes de usuario, para no perder el detalle real del fallo.
-- Adoptar desde ya la convención `${pageContext.request.contextPath}/...` en toda ruta interna, antes de que Sprint 2 agregue más carpetas por rol.
+## Para el próximo sprint
 
-## Compromisos para Sprint 2
-- Mantener la misma disciplina de commits frecuentes y verificación con `git status` antes de cada `add`.
-- Documentar decisiones de diseño no exigidas por el profesor (marcadas como [NUESTRA DECISIÓN]) directamente en el código o en este mismo repositorio de documentación.
+Antes de escribir código que dependa de un archivo existente (un CSS, un layout), revisarlo primero en vez de asumir qué tiene. Dejar siempre `e.printStackTrace()` o algo parecido en los `catch` que conviertan errores técnicos en mensajes de usuario, para no perder el detalle real si algo falla. Y usar `${pageContext.request.contextPath}/...` en toda ruta interna desde ya, antes de que Sprint 2 meta más carpetas por rol y el problema se multiplique.
