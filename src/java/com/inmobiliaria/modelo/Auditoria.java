@@ -63,4 +63,32 @@ public class Auditoria {
     public void setCorreoUsuario(String correoUsuario) {
         this.correoUsuario = correoUsuario;
     }
+
+    // ===== Enlace calculado (no viene de la base) =====
+    // La descripcion de cada evento menciona el objeto afectado
+    // ("... la propiedad id 13 (HG-2026-0001)"). Con esto la pantalla de
+    // auditoria puede ofrecer un boton "Ver" en vez de dejar al administrador
+    // buscando ese id a mano.
+
+    private static final java.util.regex.Pattern PATRON_PROPIEDAD =
+            java.util.regex.Pattern.compile("propiedad id ([0-9]+)", java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Id de la propiedad mencionada en la descripcion, o null si el evento no
+     * habla de una propiedad (cambios de rol, citas, solicitudes...).
+     */
+    public Integer getIdPropiedadRelacionada() {
+        if (descripcion == null) {
+            return null;
+        }
+        java.util.regex.Matcher coincidencia = PATRON_PROPIEDAD.matcher(descripcion);
+        if (!coincidencia.find()) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(coincidencia.group(1));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

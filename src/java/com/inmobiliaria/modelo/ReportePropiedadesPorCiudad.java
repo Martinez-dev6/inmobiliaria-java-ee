@@ -6,11 +6,20 @@ package com.inmobiliaria.modelo;
  */
 public class ReportePropiedadesPorCiudad {
 
+    private int idCiudad;
     private String nombreCiudad;
     private String estado;
     private int total;
 
     public ReportePropiedadesPorCiudad() {
+    }
+
+    public int getIdCiudad() {
+        return idCiudad;
+    }
+
+    public void setIdCiudad(int idCiudad) {
+        this.idCiudad = idCiudad;
     }
 
     public String getNombreCiudad() {

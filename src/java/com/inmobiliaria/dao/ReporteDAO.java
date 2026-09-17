@@ -17,13 +17,16 @@ public class ReporteDAO {
      * HAVING COUNT(*) > 0 es redundante en la practica (un GROUP BY nunca produce
      * grupos vacios), pero se deja explicito porque el PDF pide demostrar el uso
      * de HAVING, no solo de GROUP BY.
+     *
+     * Se selecciona tambien c.id_ciudad para que cada fila del reporte pueda
+     * enlazar al listado de esas mismas propiedades (ciudad + estado).
      */
     public List<ReportePropiedadesPorCiudad> propiedadesPorCiudadYEstado() throws SQLException {
 
-        String sql = "SELECT c.nombre_ciudad, p.estado, COUNT(*) AS total " +
+        String sql = "SELECT c.id_ciudad, c.nombre_ciudad, p.estado, COUNT(*) AS total " +
                      "FROM propiedad p " +
                      "JOIN ciudad c ON c.id_ciudad = p.id_ciudad " +
-                     "GROUP BY c.nombre_ciudad, p.estado " +
+                     "GROUP BY c.id_ciudad, c.nombre_ciudad, p.estado " +
                      "HAVING COUNT(*) > 0 " +
                      "ORDER BY c.nombre_ciudad, p.estado";
 
@@ -35,6 +38,7 @@ public class ReporteDAO {
 
             while (rs.next()) {
                 ReportePropiedadesPorCiudad r = new ReportePropiedadesPorCiudad();
+                r.setIdCiudad(rs.getInt("id_ciudad"));
                 r.setNombreCiudad(rs.getString("nombre_ciudad"));
                 r.setEstado(rs.getString("estado"));
                 r.setTotal(rs.getInt("total"));

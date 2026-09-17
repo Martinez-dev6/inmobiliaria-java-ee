@@ -1,7 +1,9 @@
 package com.inmobiliaria.controlador;
 
 import com.inmobiliaria.dao.PropiedadDAO;
+import com.inmobiliaria.dao.ReporteDAO;
 import com.inmobiliaria.dao.UsuarioDAO;
+import com.inmobiliaria.modelo.ReporteCiudad;
 import com.inmobiliaria.modelo.Usuario;
 
 import javax.servlet.ServletException;
@@ -18,6 +20,7 @@ public class AdminPanelController extends HttpServlet {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final PropiedadDAO propiedadDAO = new PropiedadDAO();
+    private final ReporteDAO reporteDAO = new ReporteDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -35,6 +38,11 @@ public class AdminPanelController extends HttpServlet {
             request.setAttribute("totalAgentes", totalAgentes);
             request.setAttribute("totalAdmins", totalAdmins);
             request.setAttribute("totalPropiedades", propiedadDAO.contarTodas());
+
+            // Resumen por ciudad para el panel: es el mismo reporte agregado,
+            // aquí sólo para dar contexto sin salir del panel.
+            request.setAttribute("ciudades",
+                    ReporteCiudad.agrupar(reporteDAO.propiedadesPorCiudadYEstado()));
 
         } catch (SQLException e) {
             e.printStackTrace();

@@ -18,13 +18,18 @@ public class AuditoriaDAO {
      * ON DELETE SET NULL). Con un INNER JOIN, esos registros desaparecerian.
      */
     public List<Auditoria> listarRecientes(int limite) throws SQLException {
+        return listarPagina(limite, 0);
+    }
+
+    /** Version paginada del historial, de mas reciente a mas antiguo. */
+    public List<Auditoria> listarPagina(int limite, int desplazamiento) throws SQLException {
 
         String sql = "SELECT a.id_auditoria, a.id_usuario, a.accion, a.descripcion, a.fecha_evento, " +
                      "       u.correo " +
                      "FROM auditoria a " +
                      "LEFT JOIN usuario u ON u.id_usuario = a.id_usuario " +
                      "ORDER BY a.fecha_evento DESC " +
-                     "LIMIT ?";
+                     "LIMIT ? OFFSET ?";
 
         List<Auditoria> lista = new ArrayList<>();
 
@@ -32,6 +37,7 @@ public class AuditoriaDAO {
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, limite);
+            ps.setInt(2, desplazamiento);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -48,5 +54,18 @@ public class AuditoriaDAO {
         }
 
         return lista;
+    }
+
+    public int contar() throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM auditoria";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            rs.next();
+            return rs.getInt(1);
+        }
     }
 }

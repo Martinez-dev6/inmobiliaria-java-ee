@@ -1,5 +1,6 @@
 package com.inmobiliaria.dao;
 
+import com.inmobiliaria.modelo.FiltroCatalogo;
 import com.inmobiliaria.modelo.Propiedad;
 import org.junit.Test;
 
@@ -31,7 +32,8 @@ public class PropiedadDAOTest {
 
     @Test
     public void buscarConFiltros_soloDevuelvePropiedadesDisponibles() throws Exception {
-        List<Propiedad> resultado = dao.buscarConFiltros(null, null, null, null);
+        FiltroCatalogo filtro = new FiltroCatalogo();
+        List<Propiedad> resultado = dao.buscarConFiltros(filtro, 100, 0);
 
         assertNotNull(resultado);
         for (Propiedad p : resultado) {
@@ -43,7 +45,10 @@ public class PropiedadDAOTest {
     @Test
     public void buscarConFiltros_respetaElRangoDePrecio() throws Exception {
         BigDecimal precioMax = new BigDecimal("100000000");
-        List<Propiedad> resultado = dao.buscarConFiltros(null, null, null, precioMax);
+        FiltroCatalogo filtro = new FiltroCatalogo();
+        filtro.setPrecioMax(precioMax);
+
+        List<Propiedad> resultado = dao.buscarConFiltros(filtro, 100, 0);
 
         for (Propiedad p : resultado) {
             assertTrue("Ninguna propiedad debe superar el precio máximo filtrado",

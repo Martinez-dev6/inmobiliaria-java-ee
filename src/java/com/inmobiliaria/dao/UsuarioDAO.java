@@ -198,6 +198,23 @@ public int contarRoles(int idUsuario) throws SQLException {
     }
 }
 
+/**
+ * Cuantas cuentas ACTIVAS tienen hoy el rol Administrador. Se usa para no
+ * dejar el sistema sin ningun administrador al revocar roles.
+ */
+public int contarAdministradores() throws SQLException {
+    String sql = "SELECT COUNT(*) FROM usuario_rol ur " +
+                 "JOIN rol r ON r.id_rol = ur.id_rol " +
+                 "JOIN usuario u ON u.id_usuario = ur.id_usuario " +
+                 "WHERE r.nombre_rol = 'Administrador' AND u.activo = TRUE";
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        rs.next();
+        return rs.getInt(1);
+    }
+}
+
 public void revocarRol(int idUsuario, String nombreRol) throws SQLException {
     String sql = "DELETE FROM usuario_rol WHERE id_usuario = ? " +
                  "AND id_rol = (SELECT id_rol FROM rol WHERE nombre_rol = ?)";
@@ -217,6 +234,35 @@ public void registrarAuditoria(int idUsuarioActor, String accion, String descrip
         ps.setString(2, accion);
         ps.setString(3, descripcion);
         ps.executeUpdate();
+    }
+}
+
+/**
+ * Activa o desactiva una cuenta. La cuenta conserva sus datos y sus roles;
+ * lo unico que cambia es que LoginController le niega la entrada mientras
+ * este inactiva. Devuelve las filas afectadas (0 si ese id no existe).
+ */
+public int cambiarEstadoActivo(int idUsuario, boolean activo) throws SQLException {
+    String sql = "UPDATE usuario SET activo = ? WHERE id_usuario = ?";
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setBoolean(1, activo);
+        ps.setInt(2, idUsuario);
+        return ps.executeUpdate();
+    }
+}
+
+/** Si esa cuenta tiene el rol Administrador, este activa o no. */
+public boolean tieneRolAdministrador(int idUsuario) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM usuario_rol ur " +
+                 "JOIN rol r ON r.id_rol = ur.id_rol " +
+                 "WHERE ur.id_usuario = ? AND r.nombre_rol = 'Administrador'";
+    try (Connection con = ConexionBD.obtenerConexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, idUsuario);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next() && rs.getInt(1) > 0;
+        }
     }
 }
 }
