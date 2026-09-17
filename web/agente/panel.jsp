@@ -1,78 +1,137 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Agente — Hogar 360</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2332'/%3E%3Cpath d='M50 18 L84 48 H74 V82 H26 V48 H16 Z' fill='%23FFB648'/%3E%3C/svg%3E">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/css/estilo.css" rel="stylesheet">
-</head>
-<body>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<jsp:include page="/WEB-INF/jspf/navbar.jsp">
-    <jsp:param name="navTipo" value="app" />
+<c:set var="accionNueva" value="${sinInmobiliaria ? '' : 'agente/propiedades?accion=nuevo'}" />
+
+<jsp:include page="/WEB-INF/jspf/app-inicio.jsp">
+    <jsp:param name="seccion" value="agente" />
+    <jsp:param name="activo" value="panel" />
+    <jsp:param name="titulo" value="Panel de la inmobiliaria" />
+    <jsp:param name="descripcion" value="Tu catálogo y lo que tienes pendiente por responder." />
+    <jsp:param name="accionUrl" value="${accionNueva}" />
+    <jsp:param name="accionTexto" value="Nueva propiedad" />
+    <jsp:param name="accionIcono" value="plus-lg" />
 </jsp:include>
 
-<div class="container py-5">
-    <h2 class="mb-1">Panel de la inmobiliaria</h2>
-    <p class="text-muted mb-4">${sessionScope.correo}</p>
+    <c:if test="${sinInmobiliaria}">
+        <jsp:include page="/WEB-INF/jspf/sin-inmobiliaria.jsp" />
+    </c:if>
 
-    <div class="row g-4 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card shadow-sm p-3 text-center">
-                <div class="fs-3 fw-bold">${totalPropiedades}</div>
-                <div class="text-muted small">Total propiedades</div>
+    <div class="metricas">
+        <div class="metrica">
+            <div class="metrica-icono"><i class="bi bi-houses"></i></div>
+            <div>
+                <div class="metrica-cifra">${totalPropiedades}</div>
+                <div class="metrica-rotulo">Propiedades</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card shadow-sm p-3 text-center">
-                <div class="fs-3 fw-bold text-success">${totalDisponibles}</div>
-                <div class="text-muted small">Disponibles</div>
+        <div class="metrica">
+            <div class="metrica-icono exito"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="metrica-cifra">${totalDisponibles}</div>
+                <div class="metrica-rotulo">Disponibles</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card shadow-sm p-3 text-center">
-                <div class="fs-3 fw-bold text-warning">${citasPendientes}</div>
-                <div class="text-muted small">Citas pendientes</div>
+        <div class="metrica">
+            <div class="metrica-icono acento"><i class="bi bi-calendar-check"></i></div>
+            <div>
+                <div class="metrica-cifra">${citasPendientes}</div>
+                <div class="metrica-rotulo">Citas por confirmar</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card shadow-sm p-3 text-center">
-                <div class="fs-3 fw-bold text-warning">${solicitudesPendientes}</div>
-                <div class="text-muted small">Solicitudes pendientes</div>
+        <div class="metrica">
+            <div class="metrica-icono acento"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <div class="metrica-cifra">${solicitudesPendientes}</div>
+                <div class="metrica-rotulo">Solicitudes por revisar</div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 h-100">
-                <h5><i class="bi bi-houses"></i> Mis propiedades</h5>
-                <p class="text-muted small">Publica, edita y gestiona tu catálogo.</p>
-                <a href="${pageContext.request.contextPath}/agente/propiedades" class="btn btn-coral btn-sm mt-auto">Ver mis propiedades</a>
+    <div class="panel-columnas">
+
+        <div class="bloque">
+            <div class="bloque-cabecera">
+                <h2>Visitas agendadas</h2>
+                <a href="${pageContext.request.contextPath}/agente/citas">Ver todas</a>
             </div>
+            <c:choose>
+                <c:when test="${empty proximasCitas}">
+                    <div class="bloque-cuerpo">
+                        <p class="text-muted mb-0">No tienes visitas pendientes ni confirmadas.</p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <ul class="lista-compacta">
+                        <c:forEach var="cita" items="${proximasCitas}">
+                            <li>
+                                <div class="principal">
+                                    <strong>${cita.tituloPropiedad}</strong>
+                                    <span>
+                                        <c:choose>
+                                            <c:when test="${not empty cita.nombresCliente}">${cita.nombresCliente} ${cita.apellidosCliente}</c:when>
+                                            <c:otherwise>${cita.correoCliente}</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </div>
+                                <div class="derecha">
+                                    <div class="small fw-semibold"><fmt:formatDate value="${cita.fechaHora}" pattern="dd/MM HH:mm"/></div>
+                                    <c:choose>
+                                        <c:when test="${cita.estado == 'confirmada'}">
+                                            <span class="badge bg-success">Confirmada</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </c:otherwise>
+            </c:choose>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 h-100">
-                <h5><i class="bi bi-calendar-check"></i> Citas</h5>
-                <p class="text-muted small">Confirma o cancela citas agendadas.</p>
-                <a href="${pageContext.request.contextPath}/agente/citas" class="btn btn-outline-claro btn-sm mt-auto">Ver citas</a>
+
+        <div class="bloque">
+            <div class="bloque-cabecera">
+                <h2>Mi operación</h2>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 h-100">
-                <h5><i class="bi bi-file-earmark-text"></i> Solicitudes</h5>
-                <p class="text-muted small">Aprueba o rechaza solicitudes recibidas.</p>
-                <a href="${pageContext.request.contextPath}/agente/solicitudes" class="btn btn-outline-claro btn-sm mt-auto">Ver solicitudes</a>
+            <div class="panel-accesos">
+                <a class="acceso-rapido" href="${pageContext.request.contextPath}/agente/propiedades">
+                    <span class="acceso-icono"><i class="bi bi-houses"></i></span>
+                    <span>
+                        <span class="acceso-titulo">Mis propiedades</span>
+                        <span class="acceso-detalle">Publica, edita y controla la disponibilidad.</span>
+                    </span>
+                    <i class="bi bi-chevron-right acceso-flecha"></i>
+                </a>
+                <a class="acceso-rapido" href="${pageContext.request.contextPath}/agente/citas">
+                    <span class="acceso-icono"><i class="bi bi-calendar-check"></i></span>
+                    <span>
+                        <span class="acceso-titulo">Citas</span>
+                        <span class="acceso-detalle">Confirma o cancela las visitas agendadas.</span>
+                    </span>
+                    <i class="bi bi-chevron-right acceso-flecha"></i>
+                </a>
+                <a class="acceso-rapido" href="${pageContext.request.contextPath}/agente/solicitudes">
+                    <span class="acceso-icono"><i class="bi bi-file-earmark-text"></i></span>
+                    <span>
+                        <span class="acceso-titulo">Solicitudes</span>
+                        <span class="acceso-detalle">Aprueba o rechaza las solicitudes recibidas.</span>
+                    </span>
+                    <i class="bi bi-chevron-right acceso-flecha"></i>
+                </a>
+                <a class="acceso-rapido" href="${pageContext.request.contextPath}/agente/perfil">
+                    <span class="acceso-icono"><i class="bi bi-building"></i></span>
+                    <span>
+                        <span class="acceso-titulo">Datos de la agencia</span>
+                        <span class="acceso-detalle">Nombre comercial, NIT y teléfono que ven los clientes.</span>
+                    </span>
+                    <i class="bi bi-chevron-right acceso-flecha"></i>
+                </a>
             </div>
         </div>
     </div>
-</div>
 
-<script src="${pageContext.request.contextPath}/js/transicion.js"></script>
-</body>
-</html>
+<jsp:include page="/WEB-INF/jspf/app-fin.jsp" />
