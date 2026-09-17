@@ -57,6 +57,11 @@ public class PropiedadDetalleController extends HttpServlet {
             request.setAttribute("imagenes", imagenPropiedadDAO.listarPorPropiedad(idPropiedad));
             request.setAttribute("nombresCaracteristicas", propiedadCaracteristicaDAO.listarNombresPorPropiedad(idPropiedad));
 
+            // Mínimo del calendario de visitas: el navegador no debe dejar ni
+            // siquiera elegir una fecha pasada (el servidor lo revalida igual).
+            request.setAttribute("fechaMinima", java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+
             if (sesion != null && sesion.getAttribute("idUsuario") != null) {
                 int idUsuario = (int) sesion.getAttribute("idUsuario");
                 request.setAttribute("esFavorita", favoritoDAO.existe(idUsuario, idPropiedad));

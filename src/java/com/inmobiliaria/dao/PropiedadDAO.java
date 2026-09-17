@@ -1,6 +1,7 @@
 package com.inmobiliaria.dao;
 
 import com.inmobiliaria.excepcion.MatriculaDuplicadaException;
+import com.inmobiliaria.modelo.FiltroCatalogo;
 import com.inmobiliaria.modelo.Propiedad;
 import com.inmobiliaria.util.ConexionBD;
 
@@ -52,8 +53,30 @@ public class PropiedadDAO {
      * agente dueño de cada una (para el panel de moderación del administrador).
      */
     public List<Propiedad> listarTodas() throws SQLException {
+        return listarTodas(null, null);
+    }
 
-        String sql =
+    /**
+     * Misma consulta, pero pudiendo acotar por ciudad y/o estado. La usa el
+     * reporte de administración para "bajar" desde una fila agregada
+     * (ciudad + estado) hasta las propiedades concretas que la componen.
+     * Con los dos parámetros en null devuelve el listado completo.
+     */
+    public List<Propiedad> listarTodas(Integer idCiudad, String estado) throws SQLException {
+        return listarTodas(idCiudad, estado, Integer.MAX_VALUE, 0);
+    }
+
+    /**
+     * Version paginada: devuelve como maximo {@code limite} filas saltando las
+     * primeras {@code desplazamiento}. Se combina con
+     * {@link #contarTodas(Integer, String)} para calcular el numero de paginas.
+     */
+    public List<Propiedad> listarTodas(Integer idCiudad, String estado, int limite, int desplazamiento)
+            throws SQLException {
+
+        List<Object> parametros = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
                 "SELECT p.id_propiedad, p.id_inmobiliaria, p.id_ciudad, p.id_tipo_propiedad, " +
                 "       p.matricula_inmobiliaria, p.titulo, p.descripcion, p.direccion, " +
                 "       p.precio, p.area_m2, p.estado, p.destacada, p.fecha_publicacion, " +
@@ -65,23 +88,74 @@ public class PropiedadDAO {
                 "JOIN ciudad c ON c.id_ciudad = p.id_ciudad " +
                 "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad " +
                 "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria " +
-                "JOIN usuario u ON u.id_usuario = i.id_usuario " +
-                "ORDER BY p.fecha_publicacion DESC";
+                "JOIN usuario u ON u.id_usuario = i.id_usuario ");
+
+        sql.append(condicionesAdmin(idCiudad, estado, parametros));
+        sql.append("ORDER BY p.fecha_publicacion DESC LIMIT ? OFFSET ?");
+        parametros.add(limite);
+        parametros.add(desplazamiento);
 
         List<Propiedad> propiedades = new ArrayList<>();
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
-            while (rs.next()) {
-                Propiedad p = mapearFila(rs);
-                p.setCorreoInmobiliaria(rs.getString("correo_inmobiliaria"));
-                propiedades.add(p);
+            aplicarParametros(ps, parametros);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Propiedad p = mapearFila(rs);
+                    p.setCorreoInmobiliaria(rs.getString("correo_inmobiliaria"));
+                    propiedades.add(p);
+                }
             }
         }
 
         return propiedades;
+    }
+
+    /** Cuenta las propiedades que cumplen los mismos filtros del listado del administrador. */
+    public int contarTodas(Integer idCiudad, String estado) throws SQLException {
+
+        List<Object> parametros = new ArrayList<>();
+        String sql = "SELECT COUNT(*) FROM propiedad p " + condicionesAdmin(idCiudad, estado, parametros);
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            aplicarParametros(ps, parametros);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    /**
+     * Arma el WHERE del listado del administrador y va acumulando los valores
+     * en {@code parametros}, para que el listado y el conteo no se separen.
+     */
+    private String condicionesAdmin(Integer idCiudad, String estado, List<Object> parametros) {
+
+        StringBuilder condiciones = new StringBuilder("WHERE 1 = 1 ");
+
+        if (idCiudad != null) {
+            condiciones.append("AND p.id_ciudad = ? ");
+            parametros.add(idCiudad);
+        }
+        if (estado != null && !estado.trim().isEmpty()) {
+            condiciones.append("AND p.estado = ? ");
+            parametros.add(estado.trim());
+        }
+
+        return condiciones.toString();
+    }
+
+    private void aplicarParametros(PreparedStatement ps, List<Object> parametros) throws SQLException {
+        for (int i = 0; i < parametros.size(); i++) {
+            ps.setObject(i + 1, parametros.get(i));
+        }
     }
 
     public Propiedad buscarPorId(int idPropiedad) throws SQLException {
@@ -97,6 +171,49 @@ public class PropiedadDAO {
                 return rs.next() ? mapearFila(rs) : null;
             }
         }
+    }
+
+    /**
+     * Formato unico de matricula del sistema: HG-<anio>-<consecutivo de 4 digitos>.
+     * El agente ya no la escribe a mano (antes podia teclear cualquier cosa y el
+     * error solo aparecia al chocar con el UNIQUE de la tabla).
+     */
+    public static final String PREFIJO_MATRICULA = "HG";
+
+    /**
+     * Devuelve la siguiente matricula libre del anio en curso. Puede haber una
+     * carrera si dos agentes publican en el mismo instante; en ese caso el
+     * UNIQUE de la tabla lo impide y quien llama reintenta.
+     */
+    public String generarMatricula() throws SQLException {
+
+        String prefijo = PREFIJO_MATRICULA + "-" + java.time.Year.now().getValue() + "-";
+
+        String sql = "SELECT matricula_inmobiliaria FROM propiedad " +
+                     "WHERE matricula_inmobiliaria LIKE ? " +
+                     "ORDER BY matricula_inmobiliaria DESC LIMIT 1";
+
+        int siguiente = 1;
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, prefijo + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String ultima = rs.getString(1);
+                    try {
+                        siguiente = Integer.parseInt(ultima.substring(prefijo.length())) + 1;
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException ignorado) {
+                        // Matricula heredada que no sigue el formato: se empieza de nuevo.
+                        siguiente = 1;
+                    }
+                }
+            }
+        }
+
+        return prefijo + String.format("%04d", siguiente);
     }
 
     public int crear(Propiedad p) throws SQLException, MatriculaDuplicadaException {
@@ -206,41 +323,28 @@ public class PropiedadDAO {
         }
     }
 
-    public List<Propiedad> buscarConFiltros(Integer idCiudad, Integer idTipoPropiedad,
-                                             BigDecimal precioMin, BigDecimal precioMax) throws SQLException {
-
-        StringBuilder sql = new StringBuilder(SELECT_BASE);
-        sql.append("WHERE p.estado = 'disponible' ");
+    /**
+     * Catalogo publico paginado. Se combina con {@link #contarConFiltros} para
+     * saber cuantas paginas hay; ambos comparten el mismo WHERE.
+     */
+    public List<Propiedad> buscarConFiltros(FiltroCatalogo filtro, int limite, int desplazamiento)
+            throws SQLException {
 
         List<Object> parametros = new ArrayList<>();
 
-        if (idCiudad != null) {
-            sql.append("AND p.id_ciudad = ? ");
-            parametros.add(idCiudad);
-        }
-        if (idTipoPropiedad != null) {
-            sql.append("AND p.id_tipo_propiedad = ? ");
-            parametros.add(idTipoPropiedad);
-        }
-        if (precioMin != null) {
-            sql.append("AND p.precio >= ? ");
-            parametros.add(precioMin);
-        }
-        if (precioMax != null) {
-            sql.append("AND p.precio <= ? ");
-            parametros.add(precioMax);
-        }
-
-        sql.append("ORDER BY p.fecha_publicacion DESC");
+        StringBuilder sql = new StringBuilder(SELECT_BASE);
+        sql.append(condicionesCatalogo(filtro, parametros));
+        // El ORDER BY sale de un enum, nunca de texto escrito por el usuario.
+        sql.append("ORDER BY ").append(filtro.getOrden().getSql()).append(" LIMIT ? OFFSET ?");
+        parametros.add(limite);
+        parametros.add(desplazamiento);
 
         List<Propiedad> propiedades = new ArrayList<>();
 
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
-            for (int i = 0; i < parametros.size(); i++) {
-                ps.setObject(i + 1, parametros.get(i));
-            }
+            aplicarParametros(ps, parametros);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -250,6 +354,68 @@ public class PropiedadDAO {
         }
 
         return propiedades;
+    }
+
+    /** Cuenta los resultados del catalogo con esos mismos filtros. */
+    public int contarConFiltros(FiltroCatalogo filtro) throws SQLException {
+
+        List<Object> parametros = new ArrayList<>();
+        String sql = "SELECT COUNT(*) FROM propiedad p " + condicionesCatalogo(filtro, parametros);
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            aplicarParametros(ps, parametros);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    private String condicionesCatalogo(FiltroCatalogo filtro, List<Object> parametros) {
+
+        StringBuilder condiciones = new StringBuilder("WHERE p.estado = 'disponible' ");
+
+        if (filtro.getIdCiudad() != null) {
+            condiciones.append("AND p.id_ciudad = ? ");
+            parametros.add(filtro.getIdCiudad());
+        }
+        if (filtro.getIdTipoPropiedad() != null) {
+            condiciones.append("AND p.id_tipo_propiedad = ? ");
+            parametros.add(filtro.getIdTipoPropiedad());
+        }
+        if (filtro.getPrecioMin() != null) {
+            condiciones.append("AND p.precio >= ? ");
+            parametros.add(filtro.getPrecioMin());
+        }
+        if (filtro.getPrecioMax() != null) {
+            condiciones.append("AND p.precio <= ? ");
+            parametros.add(filtro.getPrecioMax());
+        }
+        if (filtro.getAreaMin() != null) {
+            condiciones.append("AND p.area_m2 >= ? ");
+            parametros.add(filtro.getAreaMin());
+        }
+
+        // Caracteristicas: se piden TODAS las marcadas, no cualquiera. El
+        // HAVING COUNT(DISTINCT ...) = n es lo que convierte el OR del IN en AND.
+        List<Integer> ids = filtro.getIdsCaracteristicas();
+        if (!ids.isEmpty()) {
+            condiciones.append("AND p.id_propiedad IN (")
+                       .append("SELECT pc.id_propiedad FROM propiedad_caracteristica pc ")
+                       .append("WHERE pc.id_caracteristica IN (");
+            for (int i = 0; i < ids.size(); i++) {
+                condiciones.append(i == 0 ? "?" : ", ?");
+                parametros.add(ids.get(i));
+            }
+            condiciones.append(") GROUP BY pc.id_propiedad ")
+                       .append("HAVING COUNT(DISTINCT pc.id_caracteristica) = ?) ");
+            parametros.add(ids.size());
+        }
+
+        return condiciones.toString();
     }
 
     public List<Propiedad> listarDestacadas(int limite) throws SQLException {

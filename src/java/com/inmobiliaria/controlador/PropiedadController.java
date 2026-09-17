@@ -13,6 +13,7 @@ import com.inmobiliaria.modelo.Caracteristica;
 import com.inmobiliaria.modelo.Ciudad;
 import com.inmobiliaria.modelo.Propiedad;
 import com.inmobiliaria.modelo.TipoPropiedad;
+import com.inmobiliaria.util.Flash;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -75,18 +76,21 @@ public class PropiedadController extends HttpServlet {
         } else if ("baja".equals(accion) || "reactivar".equals(accion)) {
             procesarCambioEstado(request, response, accion);
         } else {
-            mostrarListado(request, response, "Acción no reconocida.");
+            Flash.error(request, "Acción no reconocida.");
+            response.sendRedirect(request.getContextPath() + "/agente/propiedades");
         }
     }
 
     // ===================== LISTADO =====================
 
-    private void mostrarListado(HttpServletRequest request, HttpServletResponse response, String mensaje)
+    private void mostrarListado(HttpServletRequest request, HttpServletResponse response, String error)
             throws ServletException, IOException {
 
         Integer idInmobiliaria = resolverIdInmobiliaria(request);
         if (idInmobiliaria == null) {
-            request.setAttribute("errorPropiedad", "Tu cuenta no está asociada a ninguna inmobiliaria.");
+            // Sin ficha de agencia no hay nada que listar: la vista explica por qué
+            // y ofrece el formulario para crearla.
+            request.setAttribute("sinInmobiliaria", true);
             request.getRequestDispatcher("/agente/propiedades.jsp").forward(request, response);
             return;
         }
@@ -95,13 +99,19 @@ public class PropiedadController extends HttpServlet {
             request.setAttribute("propiedades", propiedadDAO.listarPorInmobiliaria(idInmobiliaria));
         } catch (SQLException e) {
             e.printStackTrace();
-            mensaje = "No se pudo cargar el listado de propiedades.";
+            error = "No se pudo cargar el listado de propiedades.";
         }
 
-        if (mensaje != null) {
-            request.setAttribute("mensaje", mensaje);
+        if (error != null) {
+            request.setAttribute("errorPropiedad", error);
         }
         request.getRequestDispatcher("/agente/propiedades.jsp").forward(request, response);
+    }
+
+    /** POST-Redirect-GET: tras un POST se redirige al listado en vez de reenviar la vista. */
+    private void redirigirAlListado(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.sendRedirect(request.getContextPath() + "/agente/propiedades");
     }
 
     // ===================== FORMULARIO =====================
@@ -113,6 +123,7 @@ public class PropiedadController extends HttpServlet {
             request.setAttribute("ciudades", ciudadDAO.listarTodas());
             request.setAttribute("tipos", tipoPropiedadDAO.listarTodos());
             request.setAttribute("caracteristicas", cargarCaracteristicasParaFormulario(idsCaracteristicasSeleccionadas));
+            request.setAttribute("anioActual", java.time.Year.now().getValue());
         } catch (SQLException e) {
             e.printStackTrace();
             error = "No se pudieron cargar los catálogos.";
@@ -166,7 +177,7 @@ public class PropiedadController extends HttpServlet {
 
         Integer idInmobiliaria = resolverIdInmobiliaria(request);
         if (idInmobiliaria == null) {
-            mostrarListado(request, response, "Tu cuenta no está asociada a ninguna inmobiliaria.");
+            redirigirAlListado(request, response);
             return;
         }
 
@@ -182,7 +193,7 @@ public class PropiedadController extends HttpServlet {
         }
 
         try {
-            int idGenerado = propiedadDAO.crear(propiedad);
+            int idGenerado = crearConMatriculaGenerada(propiedad);
             guardarFotosNuevas(request, idGenerado);
             propiedadCaracteristicaDAO.asignarCaracteristicas(idGenerado, idsCaracteristicas);
 
@@ -199,7 +210,30 @@ public class PropiedadController extends HttpServlet {
             return;
         }
 
-        mostrarListado(request, response, "Propiedad publicada correctamente.");
+        Flash.exito(request, "Propiedad publicada correctamente.");
+        redirigirAlListado(request, response);
+    }
+
+    /**
+     * La matrícula la pone el sistema, no el agente. Se pide la siguiente libre
+     * y se reintenta si otro agente se adelantó en ese mismo instante (el UNIQUE
+     * de la tabla es quien decide, no una comprobación previa).
+     */
+    private int crearConMatriculaGenerada(Propiedad propiedad)
+            throws SQLException, MatriculaDuplicadaException {
+
+        MatriculaDuplicadaException ultimoChoque = null;
+
+        for (int intento = 0; intento < 5; intento++) {
+            propiedad.setMatriculaInmobiliaria(propiedadDAO.generarMatricula());
+            try {
+                return propiedadDAO.crear(propiedad);
+            } catch (MatriculaDuplicadaException e) {
+                ultimoChoque = e;
+            }
+        }
+
+        throw ultimoChoque;
     }
 
     // ===================== ACTUALIZAR =====================
@@ -209,7 +243,7 @@ public class PropiedadController extends HttpServlet {
 
         Integer idInmobiliaria = resolverIdInmobiliaria(request);
         if (idInmobiliaria == null) {
-            mostrarListado(request, response, "Tu cuenta no está asociada a ninguna inmobiliaria.");
+            redirigirAlListado(request, response);
             return;
         }
 
@@ -228,7 +262,8 @@ public class PropiedadController extends HttpServlet {
         try {
             int filas = propiedadDAO.actualizar(propiedad);
             if (filas == 0) {
-                mostrarListado(request, response, "Esa propiedad no existe o no te pertenece.");
+                Flash.error(request, "Esa propiedad no existe o no te pertenece.");
+                redirigirAlListado(request, response);
                 return;
             }
             eliminarFotosMarcadas(request, propiedad.getIdPropiedad());
@@ -240,7 +275,8 @@ public class PropiedadController extends HttpServlet {
             return;
         }
 
-        mostrarListado(request, response, "Propiedad actualizada correctamente.");
+        Flash.exito(request, "Propiedad actualizada correctamente.");
+        redirigirAlListado(request, response);
     }
 
     // ===================== BAJA / REACTIVAR =====================
@@ -257,7 +293,8 @@ public class PropiedadController extends HttpServlet {
                     : propiedadDAO.cambiarEstado(idPropiedad, idInmobiliaria, nuevoEstado);
 
             if (filas == 0) {
-                mostrarListado(request, response, "Esa propiedad no existe o no te pertenece.");
+                Flash.error(request, "Esa propiedad no existe o no te pertenece.");
+                redirigirAlListado(request, response);
                 return;
             }
 
@@ -267,11 +304,13 @@ public class PropiedadController extends HttpServlet {
                     ("baja".equals(accion) ? "Dio de baja" : "Reactivó") + " su propiedad id " + idPropiedad);
         } catch (SQLException e) {
             e.printStackTrace();
-            mostrarListado(request, response, "No se pudo actualizar el estado de la propiedad.");
+            Flash.error(request, "No se pudo actualizar el estado de la propiedad.");
+            redirigirAlListado(request, response);
             return;
         }
 
-        mostrarListado(request, response, "baja".equals(accion) ? "Propiedad dada de baja." : "Propiedad reactivada.");
+        Flash.exito(request, "baja".equals(accion) ? "Propiedad dada de baja." : "Propiedad reactivada.");
+        redirigirAlListado(request, response);
     }
 
     // ===================== IMÁGENES =====================
@@ -355,11 +394,27 @@ public class PropiedadController extends HttpServlet {
             propiedad.setIdTipoPropiedad(0);
         }
 
-        propiedad.setPrecio(parsearDecimal(request.getParameter("precio")));
+        propiedad.setPrecio(parsearMoneda(request.getParameter("precio")));
         propiedad.setAreaM2(parsearDecimal(request.getParameter("areaM2")));
         propiedad.setDestacada(request.getParameter("destacada") != null);
 
         return propiedad;
+    }
+
+    /**
+     * Los campos de dinero se muestran con separadores de miles (120.000.000).
+     * El JS los limpia antes de enviar, pero si no se ejecuta hay que quitarlos
+     * aquí: en un precio en pesos el punto es separador de miles, nunca decimal.
+     */
+    private BigDecimal parsearMoneda(String texto) {
+        if (texto == null) {
+            return null;
+        }
+        String soloDigitos = texto.replaceAll("[^0-9]", "");
+        if (soloDigitos.isEmpty()) {
+            return null;
+        }
+        return new BigDecimal(soloDigitos);
     }
 
     private BigDecimal parsearDecimal(String texto) {
@@ -389,10 +444,6 @@ public class PropiedadController extends HttpServlet {
     }
 
     private String validar(Propiedad propiedad, boolean esCreacion) {
-        if (esCreacion && (propiedad.getMatriculaInmobiliaria() == null
-                || propiedad.getMatriculaInmobiliaria().trim().isEmpty())) {
-            return "La matrícula inmobiliaria es obligatoria.";
-        }
         if (propiedad.getTitulo() == null || propiedad.getTitulo().trim().isEmpty()) {
             return "El título es obligatorio.";
         }
